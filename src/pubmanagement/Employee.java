@@ -30,7 +30,7 @@ public interface Employee {
      * himself.
      * @param drink to serve
      * @param client that ordered
-     * @returna Boolean for success/failure
+     * @return a Boolean for success/failure
      */
     Boolean serve(Drink drink, Client client);
 }

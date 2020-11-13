@@ -14,7 +14,7 @@ public class FemaleWaiter extends Waiter implements Gender {
     /**
      * Attribute that differenciate a male client from a female one.
      */
-    int charm;
+    int charm; // is like a level (<10)
     
     /**
      * Constructor extending Human.
@@ -104,6 +104,10 @@ public class FemaleWaiter extends Waiter implements Gender {
     }
     
     // ----- Getters -----
+    /**
+     * Get the charm.
+     * @return 
+     */
     public int getCharm() {
         return this.charm;
     }

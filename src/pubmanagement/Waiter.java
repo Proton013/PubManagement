@@ -6,7 +6,8 @@
 
 package pubmanagement;
 
-import java.time.LocalTime;
+import java.util.ArrayList;
+//import java.time.LocalTime;
 
 /**
  *
@@ -37,7 +38,6 @@ abstract public class Waiter extends Human implements Employee {
             speak("I can't drink "+drink.getName()+", this is not water.", null);
         }
         else {
-            setDateLastAction(LocalTime.now());
             drink(drink);
         }
     }
@@ -102,30 +102,42 @@ abstract public class Waiter extends Human implements Employee {
      */
     @Override
     public Boolean serve(Drink drink, Client to) {
-        //setDateLastAction(LocalTime.now());
-        int i = 0;
-        while (i < currentBar.getEmployees().size()) {
-            if (currentBar.getEmployees().get(i) instanceof Barman barman) {
-                if (!barman.isOccupied()) {
-                    speak("One "+drink.name+" for "+to.name+" !", barman);
-                    // barman remove from stock
-                    Boolean res = barman.takeFromStock(drink);
-                    if (res) {
-                        barman.speak("the " + drink.getName(), this);
-                        barman.aksToPay(drink.getSellingPrice(), to);
-                          // serve the drink
-                        speak("Here is your order !", null);
-                        to.speak("Thanks.", null);
-                        return true;
-                    }
-                    else {
-                        speak("There is no more "+drink.getName()+". Another drink perhaps ?", null);
-                        return false;
-                    }
-                }
-            }
+        Barman barman = currentBar.getBarmans().get((int) (Math.random() * currentBar.getBarmans().size()));
+        speak("One "+drink.name+" for "+to.name+" !", barman);
+        // barman remove from stock
+        Boolean res = barman.takeFromStock(drink);
+        if (res) {
+            barman.speak("the " + drink.getName(), this);
+            barman.aksToPay(drink.getSellingPrice(), to);
+              // serve the drink
+            speak("Here is your order !", null);
+            to.speak("Thanks.", null);
+            return true;
         }
-        return false;
+        else {
+            speak("There is no more "+drink.getName()+". Another drink perhaps ?", null);
+            return false;
+        }
+    }
+    
+    /**
+     * Serve the round, all employees are used.
+     * Clients drink in this method for coherent linear dialogs output
+     * @param bar where the round happens
+     * @param drink that is served
+     * @param clients that are present in the bar
+     */
+    // We supppose that the employee stop what they were initially doing 
+    // thus no use of the dateLastAction
+    public static void serveRound(Bar bar, Drink drink, ArrayList<Client> clients) {
+        for (int i = 0; i<clients.size(); i++) {
+            Waiter waiter = bar.getWaiters().get(i %bar.getWaiters().size());
+            Barman barman = bar.getBarmans().get(i % bar.getBarmans().size());
+            barman.takeFromStock(drink);
+            waiter.speak("Here is the drink for the round !", null);
+            clients.get(i).speak(clients.get(i).getShout()+" Thanks !", null);
+            clients.get(i).drink(drink);
+        }
     }
     
      /**

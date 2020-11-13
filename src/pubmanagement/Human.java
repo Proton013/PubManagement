@@ -47,8 +47,7 @@ public abstract class Human {
     protected Bar currentBar;
     
     // for time management
-    protected LocalTime dateLastAction = LocalTime.now();
-    // protected String lastAction = "initiated"; // unused for now
+    //protected LocalTime dateLastAction = LocalTime.now();
    
     /**
      * Constructor.
@@ -96,7 +95,8 @@ public abstract class Human {
      */
     public double pay(double cost) {
         this.wallet -= cost;
-        //System.out.println(this.name+" "+this.surname+" paid: "+ cost +" -> Remaining: " + this.wallet);
+        System.out.println(this.name+" "+this.surname+" paid: "+ cost 
+                +" -> Remaining: " + this.wallet);
         return cost;
     }
     
@@ -130,7 +130,7 @@ public abstract class Human {
      * For now, every action takes the same amount of time to be done
      * @return true if he is still doing an action
      */
-    public Boolean isOccupied() {
+    /*public Boolean isOccupied() {
         Duration timeItTakes = Duration.ZERO.plusSeconds(6);
         Duration duration = Duration.between(LocalTime.now(), this.dateLastAction);
         if (duration.compareTo(timeItTakes) >= 0) {
@@ -139,7 +139,7 @@ public abstract class Human {
         else {
             return false;
         }
-    }
+    }*/
     
     // ----- Getters -----
     /**
@@ -149,6 +149,7 @@ public abstract class Human {
     public String getName() {
         return this.name;
     }
+    
     /**
      * Get the surname.
      * @return a String
@@ -156,6 +157,7 @@ public abstract class Human {
     public String getSurname() {
         return this.surname;
     }
+    
     /**
      * Get the wallet balance.
      * @return a double
@@ -163,6 +165,7 @@ public abstract class Human {
     public double getWalletBalance() {
         return this.wallet;
     }
+    
     /**
      * Get the popularity level (max 10)
      * @return an integer
@@ -170,6 +173,7 @@ public abstract class Human {
     public int getPopularity() {
         return this.popularity;
     }
+    
     /**
      * Get the shout.
      * @return a String
@@ -177,6 +181,7 @@ public abstract class Human {
     public String getShout() {
         return this.shout;
     }
+    
     /**
      * Get the date of the last action.
      * @return a LocalTime
@@ -184,23 +189,4 @@ public abstract class Human {
     public LocalTime getDateLastAction() {
         return this.dateLastAction;
     }
-    /*
-    public String getLastAction() {
-        return this.lastAction;
-    }
-    */
-    
-    // ----- Setters -----
-    /**
-     * Set the date of the last action.
-     * @param date 
-     */
-    public void setDateLastAction(LocalTime date) {
-        this.dateLastAction = date;
-    }
-    /*
-    public void setLastAction(String action) {
-        this.lastAction = action;
-    }
-    */
 }

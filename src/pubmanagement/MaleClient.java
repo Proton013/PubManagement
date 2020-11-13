@@ -65,6 +65,10 @@ public class MaleClient extends Client implements Gender {
     }
     
     // ----- Getters -----
+    /**
+     * Get the tee-shirt color.
+     * @return 
+     */
     public String getTeeShirt() {
         return this.teeShirt;
     }

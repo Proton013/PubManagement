@@ -14,7 +14,7 @@ public class MaleWaiter extends Waiter implements Gender {
     /**
      * Attribute that differenciate a male client from a female one.
      */
-    int biceps;
+    int biceps; // is like a level (<10)
     
     /**
      * Constructor extending Human.
@@ -104,6 +104,10 @@ public class MaleWaiter extends Waiter implements Gender {
     }
     
     // ----- Getters -----
+    /**
+     * Get the biceps.
+     * @return 
+     */
     public int getBiceps() {
         return biceps;
     }

@@ -64,6 +64,10 @@ public class FemaleClient extends Client implements Gender {
     }
     
     // ----- Getters -----
+    /**
+     * Get the accessories list.
+     * @return 
+     */
     public ArrayList<String> getAccessories() {
         return this.accessories;
     }

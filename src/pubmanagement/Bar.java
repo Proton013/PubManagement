@@ -355,6 +355,15 @@ public class Bar {
     }
     
     /**
+     * Get the quantity of a given drink from the stocks.
+     * @param drink
+     * @return the quantity
+     */
+    public int getStock(Drink drink) {
+        return this.getStocks().get(drink.getName());
+    }
+    
+    /**
      * Get the list of all the potential clients.
      * @return 
      */
@@ -391,6 +400,30 @@ public class Bar {
      */
     public ArrayList<Employee> getEmployees() {
         return this.employees;
+    }
+    
+    /**
+     * Get the waiters.
+     * @return 
+     */
+    public ArrayList<Waiter> getWaiters() {
+        ArrayList<Waiter> waiters = new ArrayList<>();
+        for(int i = 0; i<employees.size(); i++) {
+            if (employees.get(i) instanceof Waiter employee) waiters.add(employee);
+        }
+        return waiters;
+    }
+    
+    /**
+     * Get the barmans.
+     * @return 
+     */
+    public ArrayList<Barman> getBarmans() {
+        ArrayList<Barman> barmans = new ArrayList<>();
+        for(int i = 0; i<employees.size(); i++) {
+            if (employees.get(i) instanceof Barman employee) barmans.add(employee);
+        }
+        return barmans;
     }
     
     /**

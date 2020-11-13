@@ -7,6 +7,7 @@
 package pubmanagement;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 /**
  *
@@ -108,7 +109,6 @@ abstract public class Client extends Human {
      */
     @Override
     public void drink(Drink drink) {
-        setDateLastAction(LocalTime.now());
         this.alcoholLevel += drink.alcohol;
         
         if (alcoholLevel >= ALCOHOL_THRESHOLD) {
@@ -182,46 +182,53 @@ abstract public class Client extends Human {
      */
     public Boolean orderDrink(Drink drink) {
         if (this.getWalletBalance()+this.getBill() - drink.sellingPrice < 0) return false;
-        int i = 0;
-        while(i<currentBar.getEmployees().size()) {
-            Human employee = (Human) currentBar.getEmployees().get(i);
-            if (!employee.isOccupied()) {
-                speak("S'cuse me ! I'd like one "+drink.getName()+" please", null);
-                if (employee instanceof Waiter waiter) {
-                    waiter.speak("No problem, getting that for you !", null);
-                    // waiter serve
-                    if (!waiter.serve(drink, this)) return false;
-                    // add to the bill
-                    this.bill += drink.getSellingPrice();
-                    return true;
-                }
-                else if (employee instanceof Barman barman) {
-                    barman.speak("And one "+drink.getName()+" in coming", null);
-                    // then barman serves the client
-                    if (!barman.serve(drink, this)) return false;
-                    // askToPay right away the drink and the bill
-                    barman.aksToPay(drink.getSellingPrice()+this.bill, this);
-                    return true;
-                }
-            }
-            i++;
+        Employee employee = currentBar.getEmployees().get((int) (Math.random()*currentBar.getEmployees().size()));
+        speak("S'cuse me ! I'd like one "+drink.getName()+" please", null);
+        if (employee instanceof Waiter waiter) {
+            waiter.speak("No problem, getting that for you !", null);
+            // waiter serve
+            if (!waiter.serve(drink, this)) return false;
+            // add to the bill
+            this.bill += drink.getSellingPrice();
+            return true;
+        }
+        else if (employee instanceof Barman barman) {
+            barman.speak("And one "+drink.getName()+" in coming", null);
+            // then barman serves the client
+            if (!barman.serve(drink, this)) return false;
+            // askToPay right away the drink and the bill
+            barman.aksToPay(drink.getSellingPrice()+this.bill, this);
+            return true;
         }
         return false;
     }
     
-    public void offerRound(Drink drink) {
+    /**
+     * Offer a round to all present clients (including himself).
+     * @param drink that is offered
+     * @return true if the round was successfully offered
+     */
+    public Boolean offerRound(Drink drink) {
         // count how many client for total bill
-        // offerDrink to everyone that can drink the drink
-        // barman shout "general round" or smth 
-        // boss "seems like business is still on"
-        // employee serve everywhere 
-        // clients shout 
-        // everybody drink
-        // popularity += 1
+        ArrayList<Client> present = currentBar.getPresentClients();
+        double cost = present.size()*drink.getSellingPrice();
+        if ((this.getWalletBalance()-cost < 0) || (currentBar.getStock(drink)<present.size())) return false;
+        else {
+            speak("It's my round !!", null);
+            for (int i = 0; i<present.size(); i++) {
+                // clients shout
+                present.get(i).speak(present.get(i).getShout(), null);
+            }
+            currentBar.getBoss().speak("Bussiness is still on people", null);
+            // employee serve everywhere and everybody drink
+            Waiter.serveRound(currentBar, drink, present);
+            this.popularity += 1;
+            return true;
+        }
     }
     
     /**
-     * Enter the pub.
+     * Enters the pub.
      */
     public void enterPub() {
         // added to the tables if not already in the pub
@@ -245,7 +252,7 @@ abstract public class Client extends Human {
     }
     
     /**
-     * Leave the pub.
+     * Leaves the pub.
      */
     public void leavePub() {
         int i = 0;
@@ -265,6 +272,8 @@ abstract public class Client extends Human {
             }
         }
         System.out.println(this.name+" "+this.surname+" left");
+        // alcohol level is reset
+        this.alcoholLevel = 0;
     }
     
     /**
@@ -279,21 +288,50 @@ abstract public class Client extends Human {
     }
     
     // ----- Getters -----
+    /**
+     * Get the favorite drink.
+     * @return 
+     */
     public Drink getFavoriteDrink() {
         return this.favoriteDrink;
     }
+    
+    /**
+     * Get the second favorite drink.
+     * @return 
+     */
     public Drink get2ndFavoriteDrink() {
         return this.favoriteDrink2nd;
     }
+    
+    /**
+     * Get the alcoghol level.
+     * @return 
+     */
     public int getAlcoholLevel() {
         return this.alcoholLevel;
     }
+    
+    /**
+     * Get the belote level.
+     * @return 
+     */
     public int getBeloteLevel() {
         return this.beloteLevel;
     }
+    
+    /**
+     * Get the bill (total cost).
+     * @return 
+     */
     public double getBill() {
         return this.bill;
     }
+    
+    /**
+     * Tell if the client is in the bar or out.
+     * @return 
+     */
     public Boolean getIsIn() {
         return this.isIn;
     }

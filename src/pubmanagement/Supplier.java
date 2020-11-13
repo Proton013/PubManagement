@@ -40,12 +40,22 @@ public class Supplier extends Human {
     }
  // --------------
     
+    /**
+     * Deliver the goods so the barman refill the bar's stocks.
+     * @param order
+     * @param barman 
+     */
     public void deliver(Map<String, Integer> order, Barman barman) {
         speak("Order received, getting you that", null);
         speak("Here are your goods", null);
         barman.refillStocks(order);
     }
     
+    /**
+     * Is paid for the delivery.
+     * @param barman
+     * @param totalCost 
+     */
     public void getPaid(Barman barman, double totalCost) {
         // barman give money right from till
         barman.pay(totalCost);

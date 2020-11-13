@@ -44,15 +44,31 @@ public class Drink {
     }
     
     // ----- Getters ------
+    /**
+     * Get the name.
+     * @return 
+     */
     public String getName() {
         return this.name;
     }
+    /**
+     * Get the alcohol level.
+     * @return 
+     */
     public int getAlcohol() {
         return this.alcohol;
     }
+    /**
+     * Get the purchasing price.
+     * @return 
+     */
     public double getPurchasingPrice() {
         return this.purchasingPrice;
     }
+    /**
+     * Get the selling price.
+     * @return 
+     */
     public double getSellingPrice() {
         return this.sellingPrice;
     }

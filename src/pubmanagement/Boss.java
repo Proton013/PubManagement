@@ -37,29 +37,20 @@ public class Boss extends Client {
         Boolean outcome = false;
         while (!outcome) {
             // first ask waiters
-            int i = 0;
-            while (i<currentBar.getEmployees().size()) {
-                Employee employee = currentBar.getEmployees().get(i);
-                if (employee instanceof Waiter waiter) {
-                    speak("Seems like "+client.getName()+" needs to slow down a little...", waiter);
-                    waiter.speak("I'll take care of it boss", null);
-                    outcome = waiter.sayStop(client); // result (success or failure)
-                }
-                i++;
-            }
+            for(int i = 0; i<currentBar.getWaiters().size(); i++) {
+                Waiter waiter = currentBar.getWaiters().get(i);
+                speak("Seems like "+client.getName()+" needs to slow down a little...", waiter);
+                waiter.speak("I'll take care of it boss", null);
+                outcome = waiter.sayStop(client); // result (success or failure)
+            }   
             // then ask barmans
-            i = 0;
-            while (i<currentBar.getEmployees().size()) {
-                Employee employee = currentBar.getEmployees().get(i);
-                if (employee instanceof Barman barman) {
-                    speak("Seems like "+client.getName()+" needs to slow down a little...", barman);
-                    barman.speak("I'll take care of it boss", null);
-                    outcome = barman.sayStop(client); // result (success or failure)
-                }
-                i++;
+            for(int i = 0; i<currentBar.getBarmans().size(); i++) {
+                Barman barman = currentBar.getBarmans().get(i);
+                speak("Seems like "+client.getName()+" needs to slow down a little...", barman);
+                barman.speak("I'll take care of it boss", null);
+                outcome = barman.sayStop(client); // result (success or failure)
             }  
         }
-
     }
     
     /**
@@ -70,26 +61,18 @@ public class Boss extends Client {
         Boolean outcome = false;
         while (!outcome) {
             // first ask waiters
-            int i = 0;
-            while (i<currentBar.getEmployees().size()) {
-                Employee employee = currentBar.getEmployees().get(i);
-                if (employee instanceof Waiter waiter) {
-                    speak("Seems like "+client.getName()+" should cool down outside...", waiter);
-                    waiter.speak("I'll take care of it boss", null);
-                    outcome = waiter.kickOut(client); // result (success or failure)
-                }
-                i++;
-            }
+            for(int i = 0; i<currentBar.getWaiters().size(); i++) {
+                Waiter waiter = currentBar.getWaiters().get(i);
+                speak("Seems like "+client.getName()+" should cool down outside...", waiter);
+                waiter.speak("I'll take care of it boss", null);
+                outcome = waiter.kickOut(client); // result (success or failure)
+            }   
             // then ask barmans
-            i = 0;
-            while (i<currentBar.getEmployees().size()) {
-                Employee employee = currentBar.getEmployees().get(i);
-                if (employee instanceof Barman barman) {
-                    speak("Seems like "+client.getName()+" should cool down outside...", barman);
-                    barman.speak("I'll take care of it boss", null);
-                    outcome = barman.kickOut(client);
-                }
-                i++;
+            for(int i = 0; i<currentBar.getBarmans().size(); i++) {
+                Barman barman = currentBar.getBarmans().get(i);
+                speak("Seems like "+client.getName()+" should cool down outside...", barman);
+                barman.speak("I'll take care of it boss", null);
+                outcome = barman.kickOut(client);
             }  
         }
     }

@@ -6,11 +6,11 @@
 
 package pubmanagement;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
+//import java.util.LinkedList;
+//import java.time.LocalTime;
 
 /**
  *
@@ -24,10 +24,6 @@ public class Barman extends Human implements Employee {
     public static final int LOW_QUANTITY_LIMIT = 3;
     public static final int HIGH_QUANTITY_LIMIT = 20;
     public static final double TILL_LIMIT = 250;
-    
-    //private static LinkedList<String[][]> clientOrders; // [clientName, drinkName]
-    // private static Boolean isOrderingSupplies = false;  // prevent continuous ordering
-    
     
     /**
      * Constructor.
@@ -80,9 +76,9 @@ public class Barman extends Human implements Employee {
      */
     @Override
     public double pay(double cost) {
-        getBar().setTillBalance(getBar().getTillBalance() - cost);
-        System.out.println("Bar "+getBar().getName()+" paid: "+ cost
-                +" -> Remaining: " + getBar().getTillBalance());
+        currentBar.setTillBalance(currentBar.getTillBalance() - cost);
+        System.out.println("Bar "+currentBar.getName()+" paid: "+ cost
+                +" -> Remaining: " + currentBar.getTillBalance());
         return cost;
     }
 
@@ -108,8 +104,8 @@ public class Barman extends Human implements Employee {
                 // try with 2nd drink
                 speak("I'll ask for another drink", null);
                 drink = to.favoriteDrink2nd;
-                if (!serve(drink, to)) {
-                    speak("there is no more drink you like...", to);
+                if (!serve(drink, to) || (currentBar.getTillBalance() - drink.getSellingPrice() > 0)) {
+                    speak("seems like I can't buy you this drink...", to);
                     if (rand2 <= 0.02 && popularity > 0) popularity -= 1;
                 }
             }
@@ -129,10 +125,10 @@ public class Barman extends Human implements Employee {
      */
     public void giveOverflow(Boss boss) {
         // calculate overflow
-        double overflow = getBar().getTillBalance() - TILL_LIMIT;
+        double overflow = currentBar.getTillBalance() - TILL_LIMIT;
         // remove overflow from till
-        getBar().setTillBalance(getBar().getTillBalance() - overflow);
-        System.out.println("Till - "+overflow+" -> "+getBar().getTillBalance());
+        currentBar.setTillBalance(currentBar.getTillBalance() - overflow);
+        System.out.println("Till - "+overflow+" -> "+currentBar.getTillBalance());
         // give to boss
         speak("Boss, that's the overflow", null);
         boss.takeOverflow(overflow);
@@ -148,9 +144,9 @@ public class Barman extends Human implements Employee {
         // pay
         double paid = client.pay((double) Math.round(cost)+1); // pays only superior long values
         // add to till
-        getBar().setTillBalance(getBar().getTillBalance() + paid);
+        currentBar.setTillBalance(currentBar.getTillBalance() + paid);
         giveChange(cost, paid, client);
-        System.out.println("Till + "+cost+" -> "+getBar().getTillBalance());
+        System.out.println("Till + "+cost+" -> "+currentBar.getTillBalance());
         speak("Here is your receipt", null);
         client.speak("Thank you", null);
     }
@@ -165,7 +161,7 @@ public class Barman extends Human implements Employee {
         double change = give - cost;
         client.wallet += change; // can access whitout getWallet => pb
         System.out.println(client.name+" "+client.surname+" paid: "+ cost 
-                +" -> Remaining: " + this.wallet);
+                +" -> Remaining: " + wallet);
     }
     
     /**
@@ -185,18 +181,17 @@ public class Barman extends Human implements Employee {
      * Calculate the quantities to order for each drink that has a low quantity.
      * @return in an HashTable (drinkName, quantity) to order and the total cost
      */
-    // Perhaps useless if always refill to max quantity regardless of money to pay 
     public Map<String, Integer> toOrder() {
         Map<String, Integer> toOrder = new HashMap<>();
         double totalCost = 0;
         
-        while (totalCost <= getBar().getTillBalance() - 100) {
+        while (totalCost <= currentBar.getTillBalance() - 100) {
             // add wanted quantities and drinks' name to oder map        
             for (int i = 0; i<Bar.getDrinksMenu().size(); i++) {
-                if (getStock(Bar.getDrinksMenu().get(i)) <= LOW_QUANTITY_LIMIT) {
+                if (currentBar.getStock(Bar.getDrinksMenu().get(i)) <= LOW_QUANTITY_LIMIT) {
                     totalCost += Bar.getDrinksMenu().get(i).getPurchasingPrice();
                     toOrder.put(Bar.getDrinksMenu().get(i).getName(),
-                            HIGH_QUANTITY_LIMIT - getStock(Bar.getDrinksMenu().get(i)));
+                            HIGH_QUANTITY_LIMIT - currentBar.getStock(Bar.getDrinksMenu().get(i)));
                 }
             }
         }
@@ -211,13 +206,13 @@ public class Barman extends Human implements Employee {
      * @return false if there is no more of the given drink
      */
     public Boolean takeFromStock(Drink drink) {
-        int oldValue = getBar().getStocks().get(drink.getName());
+        int oldValue = currentBar.getStocks().get(drink.getName());
         if (oldValue == 0) {
             speak("There's no more " + drink.getName() + "... We'll have to order soon", null);
             return false;
         }
         else {
-            getBar().getStocks().put(drink.getName(), oldValue - 1);
+            currentBar.getStocks().put(drink.getName(), oldValue - 1);
             return true;
         }
     }
@@ -249,7 +244,6 @@ public class Barman extends Human implements Employee {
      */
     @Override
     public Boolean serve(Drink drink, Client to) {
-        //setDateLastAction(LocalTime.now());
         // barman remove from stock
         if (takeFromStock(drink)) {
             speak("The " + drink.getName() +" !", null);
@@ -286,28 +280,5 @@ public class Barman extends Human implements Employee {
         speak("You should stop drinking for now paw.", null);
         // no condition, is called after waiters
         return true;
-    }
-    
-    // ----- Setters -----    
-    private void setStock(Drink drink, int quantity) {
-        getBar().getStocks().replace(drink.getName(), quantity);
-    }
-    
-    // ----- Getters -----    
-    /**
-     * Get the quantity of a given drink from the stocks.
-     * @param drink
-     * @return the quantity
-     */
-    private int getStock(Drink drink) {
-        return getBar().getStocks().get(drink.getName());
-    }
-    
-    /**
-     * Get the current bar the human is in.
-     * @return 
-     */
-    public Bar getBar() {
-        return this.currentBar;
     }
 }           
