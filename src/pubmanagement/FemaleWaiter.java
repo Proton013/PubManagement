@@ -61,7 +61,7 @@ public class FemaleWaiter extends Waiter implements Gender {
     public Waiter changeGender() {
         // get infos and create a new Male/Female-Waiter 
         // then remove the obsolete one
-        return new MaleWaiter(this.name, this.surname, this.wallet, this.popularity, this.shout,
+        return new MaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
         this.charm);
     }
     

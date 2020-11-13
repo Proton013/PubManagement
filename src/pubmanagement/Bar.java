@@ -24,23 +24,63 @@ public class Bar {
     /**
      * Path names of the initiation files 
      */
-    public static final String FEMALE_NAMES_PATH = "/data/female_names";
-    public static final String MALE_NAMES_PATH = "/data/male_names";
-    public static final String SURNAMES_PATH = "/data/surnames";
-    public static final String DRINKS_PATH = "/data/surnames";
-    public static final String SHOUT_PATH = "/data/shouts";
-    public static final String ACCESSORIES_PATH = "/data/accessories";
-    public static final String COLORS_PATH = "/data/colors";
+    public static final String FEMALE_NAMES_PATH = "src/resources/female_names.txt";
+    public static final String MALE_NAMES_PATH = "src/resources/male_names.txt";
+    public static final String SURNAMES_PATH = "src/resources/surnames.txt";
+    public static final String DRINKS_PATH = "src/resources/drinks.txt";
+    public static final String SHOUT_PATH = "src/resources/shouts.txt";
+    public static final String ACCESSORIES_PATH = "src/resources/accessories.txt";
+    public static final String COLORS_PATH = "src/resources/colors.txt";
     
+    /**
+     * Stored data that is loaded at the initiation.
+     */
+    public static ArrayList<String> DRINKS;
+    public static ArrayList<String> MALE_NAMES;
+    public static ArrayList<String> FEMALE_NAMES;
+    public static ArrayList<String> SURNAMES;
+    public static ArrayList<String> SHOUTS;
+    public static ArrayList<String> ACCESSORIES;
+    public static ArrayList<String> COLORS;
+    
+    /**
+     * Name of the pub.
+     * (Should be defined by the user)
+     */
     private final String name;
-    // following attributes are loaded from a text file
-    private Boss boss; // is female
-    private ArrayList<Employee> employees;
-    private ArrayList<Client> clients;
-    private ArrayList<Client[]> tables = new ArrayList<>(); // 4 places each (null if place is Empty)
-    private static ArrayList<Drink> drinksMenu;
+    /**
+     * Boss of the pub.
+     * (is always female)
+     */
+    private Boss boss;
+    /**
+     * Employee list with all instanciated employee of the this bar.
+     */
+    private ArrayList<Employee> employees = new ArrayList<>();
+    /**
+     * Possible clients of the bar.
+     * (Is like the population that has acces to bars as clients)
+     */
+    private ArrayList<Client> clients = new ArrayList<>();
+    /**
+     * Space that may be used by clients.
+     * (Says if the client is in or out this bar)
+     * (4 place per table at most, null if unused space)
+     */
+    private ArrayList<Client[]> tables = new ArrayList<>();
+    /**
+     * All drinks instances for all bars.
+     */
+    private static ArrayList<Drink> drinksMenu = new ArrayList<>();
+    /**
+     * Money of the bar.
+     */
     private double till;
+    /**
+     * Stocks (name, quantity) of each drink of the drinksMenu.
+     */
     private Map<String, Integer> stocks;
+    
     
     /**
      * Constructor
@@ -48,7 +88,11 @@ public class Bar {
      */
     public Bar(String name) {
         this.name = name;
+        this.till = Math.random()*200;
+        
+        this.init();
     }
+    
     
     // ----- Add (user) -----
     /**
@@ -89,7 +133,6 @@ public class Bar {
     
     
     // ----- Displays (user) -----
-    
     /**
      * Displays in the console for the user the drinks menu.
      */
@@ -111,28 +154,116 @@ public class Bar {
         System.out.println("* * *    * * *");
     }
     
+    
+    // ---- Initiation -----    
     /**
      * Initiate the Bar with its starting values and people.
-     * @throws IOException from loadData()
+     * (drinksMenu, 1 boss, 3 employees, 10 clients)
      */
-    private void init() throws IOException{
+    private void init() {
+        // load the resources
+        try {
+            Bar.loadAttributes();
+        } 
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        
         // initiating tables: 4
         for(int i = 0; i<4; i++) {
             this.tables.add(new Client[4]);
         }
         // Drinks 
-        ArrayList<String> drinks = loadData(DRINKS_PATH, ",");
-        // Humans: loading used infos from files
-        ArrayList<String> maleNames = loadData(MALE_NAMES_PATH, ",");
-        ArrayList<String> femaleNames = loadData(FEMALE_NAMES_PATH, ",");
-        ArrayList<String> surnames = loadData(SURNAMES_PATH, ",");
-        ArrayList<String> shouts = loadData(SHOUT_PATH, ",");
-        ArrayList<String> accessories = loadData(ACCESSORIES_PATH, ",");
-        ArrayList<String> colors = loadData(COLORS_PATH, ",");
+        for (int i = 0; i<Bar.DRINKS.size(); i++) {
+            if (i%3 == 0){
+                Bar.drinksMenu.add(new Drink(
+                        Bar.DRINKS.get(i), 
+                        Integer.parseInt(Bar.DRINKS.get(i+1)), 
+                        Double.parseDouble(Bar.DRINKS.get(i+2)), 
+                        Double.parseDouble(Bar.DRINKS.get(i+2)) + 1.50
+                ));
+            }
+        }
         // - Boss
-        // - Employees: 1 Barman and 2 Waiter (both gender)
-        // - Clients: 10
+        this.boss = new Boss (
+                this,
+                Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+                Math.random()*200,
+                (int) (Math.random()*10),
+                Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
+                Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                (int) (Math.random()*10)
+        );
         
+        // - Employees: 1 Barman and 2 Waiter (both gender)
+        this.employees.add(new MaleWaiter(
+            this,
+            Bar.MALE_NAMES.get((int) (Math.random()*Bar.MALE_NAMES.size())),
+            Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+            Math.random()*200,
+            (int) (Math.random()*10),
+            Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
+            (int) (Math.random()*10)
+        ));
+        
+        this.employees.add(new FemaleWaiter(
+            this,
+            Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+            Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+            Math.random()*200,
+            (int) (Math.random()*10),
+            Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
+            (int) (Math.random()*10)
+        ));
+        // the barman does not really have a gender but both gender's names are possibles
+        this.employees.add(new Barman(
+            this,
+            Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+            Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+            Math.random()*200,
+            (int) (Math.random()*10),
+            Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size()))
+        )); 
+        
+        // - Clients: 10
+        for(int i = 0; i<10; i++) {
+            double rand = Math.random();
+            // equally chance of generation between male and female
+            if (rand < 0.5) {
+                this.clients.add(new MaleClient(
+                    this,
+                    Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                    Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+                    Math.random()*200,
+                    (int) (Math.random()*10),
+                    Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
+                    Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                    Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                    (int) (Math.random()*10),
+                    Bar.COLORS.get((int) (Math.random()*Bar.COLORS.size()))+" tee-shirt"
+                ));
+            }
+            else {
+                ArrayList<String> accessories = new ArrayList<>();
+                for (int j = 0; j<(int) (Math.random()*5); j++) {
+                    accessories.add(Bar.ACCESSORIES.get((int) (Math.random()*Bar.ACCESSORIES.size())));
+                }
+                this.clients.add(new FemaleClient(
+                    this,
+                    Bar.MALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                    Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+                    Math.random()*200,
+                    (int) (Math.random()*10),
+                    Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
+                    Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                    Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
+                    (int) (Math.random()*10),
+                    accessories
+                )); 
+            }
+        }
     }
     
     // ----- Loaders ----- (for initiating every starting attributes)
@@ -143,7 +274,7 @@ public class Bar {
      * @return an ArrayList of each data parse to String
      * @throws IOException 
      */
-    public ArrayList<String> loadData(String pathName, String separator) throws IOException {
+    public static ArrayList<String> loadData(String pathName, String separator) throws IOException {
         ArrayList<String> data;    // stored final data
         data = new ArrayList<>(0); // will be resized afterwards
         BufferedReader reader = new BufferedReader(new FileReader(pathName));
@@ -172,28 +303,69 @@ public class Bar {
         return data;
     }
     
+    /**
+     * Load all needed resources for bar initiation and auto instanciations.
+     * @throws IOException 
+     */
+    public static void loadAttributes() throws IOException {
+        // Drinks 
+        Bar.DRINKS = Bar.loadData(DRINKS_PATH, "\t");
+        // Humans
+        Bar.MALE_NAMES = Bar.loadData(MALE_NAMES_PATH, ",");
+        Bar.FEMALE_NAMES = Bar.loadData(FEMALE_NAMES_PATH, ",");
+        Bar.SURNAMES = Bar.loadData(SURNAMES_PATH, ",");
+        Bar.SHOUTS = Bar.loadData(SHOUT_PATH, ",");
+        Bar.ACCESSORIES = Bar.loadData(ACCESSORIES_PATH, ",");
+        Bar.COLORS = Bar.loadData(COLORS_PATH, ",");
+    }
+    
+    
     // ----- Setters -----
+    /**
+     * Set the till to its new balance.
+     * @param NewBalance 
+     */
     public void setTillBalance(double NewBalance) {
         this.till = NewBalance;
     }
     
     // ----- Getters -----    
+    /**
+     * Get the name of this bar.
+     * @return 
+     */
     public String getName() {
         return this.name;
     }
     
+    /**
+     * Get the till balance if this bar.
+     * @return 
+     */
     public double getTillBalance() {
         return this.till;
     }
     
+    /**
+     * Get the stocks (names, quantities) of the bar.
+     * @return 
+     */
     public Map<String, Integer> getStocks() {
         return this.stocks;
     }
     
+    /**
+     * Get the list of all the potential clients.
+     * @return 
+     */
     public ArrayList<Client> getClients() {
         return this.clients;
     }
     
+    /**
+     * Get the tables of the bar.
+     * @return 
+     */
     public ArrayList<Client[]> getTables() {
         return this.tables;
     }
@@ -213,14 +385,26 @@ public class Bar {
         return present;
     }
     
+    /**
+     * Get the list of employees of this bar.
+     * @return 
+     */
     public ArrayList<Employee> getEmployees() {
         return this.employees;
     }
     
+    /**
+     * Get the boss of the bar.
+     * @return 
+     */
     public Boss getBoss() {
         return this.boss;
     }
     
+    /**
+     * Get the drink menu of all bars.
+     * @return 
+     */
     public static ArrayList<Drink> getDrinksMenu() {
         return Bar.drinksMenu;
     }

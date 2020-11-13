@@ -1,0 +1,26 @@
+Pale Ale	3	3.10
+Wheat Beer	2	2.70
+Pauler Dunkel	5	3.70
+Bud Light Lime	2	4.30
+Corana	1	3.20
+Guinness	3	3.35
+Ch'ti	5	3.57
+Heineker	2	2.58
+Peroni	6	4.70
+BonesHacker	5	5.43
+Mojito	4	5.32
+Daiquiri	8	4.65
+Bloody Mary	9	5.10
+Screwdriver	6	4.60
+Monaco	4	5.35
+Mai tai	7	6.45
+Scotch	8	5.30
+Tequila Sunrise	8	5.75
+Whiskey	10	6.80
+Manhattan	6	6.90
+Champagne	8	12.46
+Red Wine	7	9.60
+White Wine	6	9.40
+Rum	7	7.35
+Vodka	10	7.00
+Absinthe	9	8.40

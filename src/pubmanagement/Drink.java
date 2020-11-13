@@ -11,9 +11,22 @@ package pubmanagement;
  * @author eugenie_dalmas
  */
 public class Drink {
+    
+    /**
+     * The name of the drink.
+     */
     String name;
-    int alcohol; // level of the drink
+    /**
+     * The alcohol level of the drink.
+     */
+    int alcohol;
+    /**
+     * The purchasing price (bar to supplier).
+     */
     double purchasingPrice;
+    /**
+     * The selling price (client to bar).
+     */
     double sellingPrice;
     
     /**

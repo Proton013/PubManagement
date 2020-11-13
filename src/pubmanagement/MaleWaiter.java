@@ -18,6 +18,7 @@ public class MaleWaiter extends Waiter implements Gender {
     
     /**
      * Constructor extending Human.
+     * @param bar
      * @param name
      * @param surname
      * @param wallet
@@ -25,9 +26,9 @@ public class MaleWaiter extends Waiter implements Gender {
      * @param shout
      * @param biceps 
      */
-    public MaleWaiter(String name, String surname, double wallet, int popularity, String shout,
+    public MaleWaiter(Bar bar, String name, String surname, double wallet, int popularity, String shout,
             int biceps) {
-        super(name, surname, wallet, popularity, shout);
+        super(bar, name, surname, wallet, popularity, shout);
         this.biceps = biceps;
     }
     
@@ -59,7 +60,7 @@ public class MaleWaiter extends Waiter implements Gender {
     @Override
     public Waiter changeGender() {
         // get current attributes and create a new FemaleWaiter
-        return new FemaleWaiter(this.name, this.surname, this.wallet, this.popularity, this.shout,
+        return new FemaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
         this.biceps);
         // need to remove from list of employee the previous one
     }

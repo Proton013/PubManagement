@@ -14,16 +14,39 @@ import java.time.LocalTime;
  */
 abstract public class Client extends Human {
     
+    /**
+     * Threshold of alcohol level where beyond is considered too drunk to be
+     * acceptable.
+     */
+    public static final int ALCOHOL_THRESHOLD = 8; // too drunk to be acceptable
+    
+    /**
+     * The favorite drink of the client.
+     */
     protected final Drink favoriteDrink;
+    /**
+     * The second favorite drink of the client.
+    */
     protected final Drink favoriteDrink2nd;
+    /**
+     * The alcohol level of this client.
+     */
     protected int alcoholLevel = 0;
+    /**
+     * The belote level of the client.
+     */
     protected final int beloteLevel;
     // private final double drinkingSpeed; = random ?
+    
+    /**
+     * The cumulatited bill for unpaid drinks.
+     */
     private double bill = 0;
     
+    /**
+     * Tell if the client is in the bar or out.
+     */
     private Boolean isIn = false;
-    
-    public static final int ALCOHOL_THRESHOLD = 8; // too drunk to be acceptable
     
     /**
      * Constructor that extends Human constructor.
@@ -54,7 +77,6 @@ abstract public class Client extends Human {
     @Override
     public void speak(String message, Human to) {
         if (this.alcoholLevel >= ALCOHOL_THRESHOLD - 4) {
-            // is tipsy
             speakTipsy(message, to);
         }
         else {
@@ -88,9 +110,6 @@ abstract public class Client extends Human {
     public void drink(Drink drink) {
         setDateLastAction(LocalTime.now());
         this.alcoholLevel += drink.alcohol;
-        // => drinkingSpeed*timeOffset
-        // if (now - dt_drink < drinkingSpeed*timeOffset) -> still drinking
-        // else -> can have another drink
         
         if (alcoholLevel >= ALCOHOL_THRESHOLD) {
             // is drunk, employee immediatly spot him
@@ -99,7 +118,7 @@ abstract public class Client extends Human {
     }
     
     /**
-     * Pay the given drink.
+     * Pay the cost for any payment, here a drink.
      * @param cost
      * @return the amount that was paid
      */
@@ -130,7 +149,7 @@ abstract public class Client extends Human {
                 speak("I'll ask for another drink", null);
                 drink = to.favoriteDrink2nd;
                 if (!orderDrink(drink)) {
-                    speak("there is no more drink you like...", to);
+                    speak("seems like I can't buy you this drink...", to);
                     to.speak("That's a shame", to);
                     if (rand2 <= 0.02 && popularity > 0) popularity -= 1;
                 }
@@ -162,8 +181,9 @@ abstract public class Client extends Human {
      * @return false if drink succefully oredered (drink is in stock)
      */
     public Boolean orderDrink(Drink drink) {
+        if (this.getWalletBalance()+this.getBill() - drink.sellingPrice < 0) return false;
         int i = 0;
-        while(i<currentBar.getEmployees().size()) { // && !ordered
+        while(i<currentBar.getEmployees().size()) {
             Human employee = (Human) currentBar.getEmployees().get(i);
             if (!employee.isOccupied()) {
                 speak("S'cuse me ! I'd like one "+drink.getName()+" please", null);
@@ -270,6 +290,9 @@ abstract public class Client extends Human {
     }
     public int getBeloteLevel() {
         return this.beloteLevel;
+    }
+    public double getBill() {
+        return this.bill;
     }
     public Boolean getIsIn() {
         return this.isIn;

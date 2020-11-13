@@ -18,11 +18,14 @@ import java.util.Map;
  */
 public class Barman extends Human implements Employee {
     
+    /**
+     * Fixed limits for stocks and till.
+     */
     public static final int LOW_QUANTITY_LIMIT = 3;
     public static final int HIGH_QUANTITY_LIMIT = 20;
     public static final double TILL_LIMIT = 250;
     
-    private static LinkedList<String[][]> clientOrders; // [clientName, drinkName]
+    //private static LinkedList<String[][]> clientOrders; // [clientName, drinkName]
     // private static Boolean isOrderingSupplies = false;  // prevent continuous ordering
     
     
@@ -70,6 +73,11 @@ public class Barman extends Human implements Employee {
         }
     }
     
+    /**
+     * Pay the cost for any payment.
+     * @param cost
+     * @return the amount that was paid
+     */
     @Override
     public double pay(double cost) {
         getBar().setTillBalance(getBar().getTillBalance() - cost);
@@ -214,22 +222,22 @@ public class Barman extends Human implements Employee {
         }
     }
     
-    // fine if it is not optimised = take time to calculate
+    /**
+     * Update the quantities of delivered drinks in the stocks.
+     * @param delivery Map of drink delivered and their ordered quantities
+     */
     public void refillStocks(Map<String, Integer> delivery) {
-        // TODO
-        // for each drink on toOrder => refill max quantities
         ArrayList<String> deliveryDrinks = new ArrayList<>(delivery.keySet());
         ArrayList<String> stockDrinks = new ArrayList<>(currentBar.getStocks().keySet());
         
         for (int i = 0; i < deliveryDrinks.size(); i ++) {
             for (int j = 0; j < stockDrinks.size(); j ++) {
                 if (deliveryDrinks.contains(stockDrinks.get(j))) {
-                // add quantities to drinks that were delivered
+                // add quantities until the limit to drinks that were delivered
                     currentBar.getStocks().replace(stockDrinks.get(j), HIGH_QUANTITY_LIMIT);
                 }
             }
         }
-         
     }
     
     // Employee ----------

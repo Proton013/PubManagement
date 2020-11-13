@@ -17,12 +17,15 @@ public class Supplier extends Human {
     
     /**
      * Constructor.
+     * @param bar
      * @param name
      * @param surname
+     * @param wallet unused
+     * @param shout unused
+     * @param popularity unused
      */
-    public Supplier(String name, String surname) {
-        this.name = name;
-        this.surname = surname;
+    public Supplier(Bar bar, String name, String surname, double wallet, int popularity, String shout) {
+        super(bar, name, surname, wallet, popularity, shout);
     }
     
  // throw error ?

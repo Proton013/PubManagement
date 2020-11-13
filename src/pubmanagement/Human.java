@@ -14,15 +14,36 @@ import java.time.*;
  */
 public abstract class Human {
     
+    /**
+     * Possible introductions seperated by a coma.
+     */
     public static final String INTRODUCTIONS 
             = "Hi,Hello,Let me introduce myself,Oh hi,Hi mate,Well hi";
     
+    /**
+     * The name of the human.
+     */
     protected String name;
+    /**
+     * The surname of the human.
+     */
     protected String surname;
-    protected double wallet;    // balance of wallet
-    protected int popularity;   // level
+    /**
+     * The wallet balence of this human.
+     */
+    protected double wallet;
+    /**
+     * The popularity level of this human.
+     */    
+    protected int popularity;
+    /**
+     * THe souht of the human.
+     */
     protected String shout;
     
+    /**
+     * Instance of the bar that the human is currently assigned to / is in.
+     */
     protected Bar currentBar;
     
     // for time management
@@ -69,15 +90,13 @@ public abstract class Human {
     }
     
     /**
-     * Pay the given drink.
+     * Pay the cost for any payment.
      * @param cost
      * @return the amount that was paid
      */
     public double pay(double cost) {
         this.wallet -= cost;
-        System.out.println(this.name+" "+this.surname+" paid: "+ cost +" -> Remaining: " + this.wallet);
-        // pay not exactly the cost but a bit more as int 
-        // return paid;
+        //System.out.println(this.name+" "+this.surname+" paid: "+ cost +" -> Remaining: " + this.wallet);
         return cost;
     }
     
