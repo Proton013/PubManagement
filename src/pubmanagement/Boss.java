@@ -6,6 +6,9 @@
 
 package pubmanagement;
 
+import Exceptions.SelfInteractionException;
+import java.util.ArrayList;
+
 /**
  *
  * @author eugenie_dalmas
@@ -83,5 +86,41 @@ public class Boss extends Client {
      */
     public void takeOverflow(double overflow) {
         this.wallet += overflow;
-    }    
+    }
+    
+    /**
+     * Run an action given probabilities between all the ones the boss can 
+     * start alone.
+     * @param clients that are present in the pub
+     */
+    @Override
+    public void action(ArrayList<Client> clients) {
+        double randAction = Math.random();
+        // - order a drink
+        if (randAction >= 0.5) { 
+            if (!orderDrink(favoriteDrink)) {
+                orderDrink(favoriteDrink2nd);
+            }
+        }
+        // - offer a drink to a client
+        else if (randAction >= 0.4 && randAction<0.5) {
+            if (clients.size()>0){ // -- to client
+                try {
+                    offerDrink(clients.get((int) (Math.random()*clients.size())));
+                }
+                catch (SelfInteractionException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+        // - offer her round
+        else if (randAction >= 0.35 && randAction<0.4 && clients.size()>0) { 
+            // try with his favorites drinks
+            if (!offerRound(favoriteDrink)) { 
+                offerRound(favoriteDrink2nd);
+            }
+        }
+        // else do nothing
+    }
+    
 }

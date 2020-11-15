@@ -6,6 +6,8 @@
 
 package pubmanagement;
 
+import Exceptions.SelfInteractionException;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 
@@ -13,7 +15,7 @@ import java.util.ArrayList;
  *
  * @author eugenie_dalmas
  */
-abstract public class Client extends Human {
+abstract public class Client extends Human implements Gender {
     
     /**
      * Threshold of alcohol level where beyond is considered too drunk to be
@@ -128,11 +130,12 @@ abstract public class Client extends Human {
     }
     
     /**
-     * Buy a drink for another fellow human and maybe change its popularity.
-     * @param to the human that receive the drink
+     * Buy a drink for another fellow client and maybe change its popularity.
+     * @param to the client that receive the drink
      */
     @Override
-    public void offerDrink(Client to) {
+    public void offerDrink(Client to) throws SelfInteractionException {
+        if (to == this) throw new SelfInteractionException("Tried to offer a drink to himself.");
         Drink drink = to.favoriteDrink;
         double rand1 = Math.random();
         double rand2 = Math.random();
@@ -160,6 +163,38 @@ abstract public class Client extends Human {
         else {
             to.refuseDrinkOffer(this);
             if (rand2 <= 0.02 && popularity > 0) popularity -= 1;
+        }
+    }
+    
+    /**
+     * Buy a drink for a waiter and maybe change its popularity.
+     * This will offer his favorite drink and the waiter will refuse if not water
+     * @param to the waiter that receive the drink
+     */
+    public void offerDrink(Waiter to) {
+        Drink drink = this.favoriteDrink;
+        double rand1 = Math.random();
+        double rand2 = Math.random();
+        if (rand1 <= 0.1) {
+            speak("was it ?", to);
+        }
+        speak("I'll offer you a drink.", to);
+        // if not water refuse and more or less well taken
+        if (rand2 <= 0.6 || this.alcoholLevel>7) { // bad
+            to.refuseDrinkOffer(this);
+            speak("Too bad for you", null);
+            if (rand2 <= 0.02 && popularity > 0) popularity -= 1;
+        }
+        else { // good -> accept if water
+            if (drink.getName().equals("Water")) {
+                to.speak("Oh thank you !", null);
+                to.drink(drink);
+            }
+            else {
+                to.refuseDrinkOffer(this);
+                speak("That's a shame", null);
+            }
+            if (rand2 <= 0.02 && popularity > 0) popularity += 1;
         }
     }
     
@@ -231,6 +266,7 @@ abstract public class Client extends Human {
      * Enters the pub.
      */
     public void enterPub() {
+        System.out.println("!!!! in enter pub method !!!!");
         // added to the tables if not already in the pub
         while (!isIn) {
             for(int i = 0; i<currentBar.getTables().size(); i++) {
@@ -286,6 +322,109 @@ abstract public class Client extends Human {
             leavePub();
         }
     }
+    
+    // Gender ------------
+    /**
+     * Tell of what gender is the client.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        if (this instanceof FemaleClient) {
+            return "female";
+        }
+        else {
+            return "male";
+        }
+    }
+    
+    /**
+     * Change the gender of the client.
+     */
+    @Override
+    public void changeGender() {
+        Client newThis = this;
+        // get infos and create a new Male/Female-Waiter 
+        if (this instanceof FemaleClient) {
+            String color = Bar.COLORS.get((int) (Math.random()*Bar.COLORS.size()));
+            String teeShirt = color + " tee-shirt";
+            newThis = new MaleClient(this.currentBar,this.name, this.surname, this.wallet, 
+                    this.popularity, this.shout, this.favoriteDrink, 
+                    this.favoriteDrink2nd, this.beloteLevel, teeShirt);
+        }
+        else if (this instanceof MaleClient) {
+            ArrayList<String> accessories = new ArrayList<>(); // random to found
+            newThis = new FemaleClient(this.currentBar, this.name, this.surname, this.wallet, 
+                    this.popularity, this.shout, this.favoriteDrink, 
+                    this.favoriteDrink2nd, this.beloteLevel, accessories);
+        }
+        // then replace the obsolete one
+        if (currentBar.removeClient(this)) currentBar.addClient(newThis);
+    }
+    
+    // Management -----------
+    /**
+     * Run an action given probabilities between all the ones the client can 
+     * start alone.
+     * @param clients that are present in the pub
+     */
+    @Override
+    public void action(ArrayList<Client> clients) {
+        ArrayList<Waiter> waiters = currentBar.getWaiters();
+        double randAction = Math.random();
+        if (!getIsIn()) {
+            // - enters pub
+            if (randAction > 0.5) enterPub();
+            // - change gender
+            else if (randAction <= 0.01) {
+                changeGender();
+            }
+        }
+        else { // do one of the following actions
+            // - order a drink
+            if (randAction >= 0.5) { 
+                if (!orderDrink(favoriteDrink)) {
+                    orderDrink(favoriteDrink2nd);
+                }
+            }
+            // - offer a drink to someone
+            else if (randAction >= 0.4 && randAction<0.5) {
+                double randHuman = Math.random();
+                if (randHuman > 0.3 && clients.size()>0){ // -- to client
+                    try {
+                        offerDrink(clients.get((int) (Math.random()*clients.size())));
+                    }
+                    catch (SelfInteractionException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+                else { // -- to waiter
+                    // probability of offer differs on the waiters charm/bicep
+                    Waiter tmp = waiters.get((int) (Math.random()*clients.size()));
+                    if (tmp instanceof FemaleWaiter to) {
+                        // more likely to make an offer if charm is higher
+                        if ((int) (Math.random()*10) <= to.getCharm()) offerDrink(to);
+                    }
+                    else if (tmp instanceof MaleWaiter to) {
+                        // less likely to make an offer if biceps is higher
+                        if ((int) (Math.random()*10) >= to.getBiceps()) offerDrink(to);
+                    }
+                }
+            }
+            // - offer his round
+            else if (randAction >= 0.35 && randAction<0.4 && clients.size()>0) { 
+                // try with his favorites drinks
+                if (!offerRound(favoriteDrink)) { 
+                    offerRound(favoriteDrink2nd);
+                }
+            }
+            // - leaves the pub
+            else if (randAction >= 0.3 && randAction <0.35) leavePub();
+            
+            // else do nothing
+        }
+    }
+    
     
     // ----- Getters -----
     /**

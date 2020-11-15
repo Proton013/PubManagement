@@ -19,13 +19,6 @@ import java.util.Map;
 public class Barman extends Human implements Employee {
     
     /**
-     * Fixed limits for stocks and till.
-     */
-    public static final int LOW_QUANTITY_LIMIT = 3;
-    public static final int HIGH_QUANTITY_LIMIT = 20;
-    public static final double TILL_LIMIT = 250;
-    
-    /**
      * Constructor.
      * @param bar to access to the bar's attributes (till and stock)
      * @param name
@@ -45,12 +38,11 @@ public class Barman extends Human implements Employee {
      */
     @Override
     public void speak(String message, Human to) {
-        System.out.println();
         System.out.print("< Barman "+this.name+" > ");
         if (to!= null) {
             System.out.print(to.getName()+", ");
         }
-        System.out.print(message);
+        System.out.println(message);
     }
     
     /**
@@ -59,7 +51,7 @@ public class Barman extends Human implements Employee {
      */
     @Override
     public void drink(Drink drink) {
-        if (drink.getAlcohol() == 0) {
+        if (drink.getAlcohol() != 0) {
             speak("I can't drink "+drink.getName()+", there is alcohol.", null);
         }
         else {
@@ -77,7 +69,7 @@ public class Barman extends Human implements Employee {
     @Override
     public double pay(double cost) {
         currentBar.setTillBalance(currentBar.getTillBalance() - cost);
-        System.out.println("Bar "+currentBar.getName()+" paid: "+ cost
+        System.out.println("    # Bar "+currentBar.getName()+" paid: "+ cost
                 +" -> Remaining: " + currentBar.getTillBalance());
         return cost;
     }
@@ -125,10 +117,10 @@ public class Barman extends Human implements Employee {
      */
     public void giveOverflow(Boss boss) {
         // calculate overflow
-        double overflow = currentBar.getTillBalance() - TILL_LIMIT;
+        double overflow = currentBar.getTillBalance() - Bar.TILL_LIMIT;
         // remove overflow from till
         currentBar.setTillBalance(currentBar.getTillBalance() - overflow);
-        System.out.println("Till - "+overflow+" -> "+currentBar.getTillBalance());
+        System.out.println("    # Till - "+overflow+" -> "+currentBar.getTillBalance());
         // give to boss
         speak("Boss, that's the overflow", null);
         boss.takeOverflow(overflow);
@@ -146,7 +138,7 @@ public class Barman extends Human implements Employee {
         // add to till
         currentBar.setTillBalance(currentBar.getTillBalance() + paid);
         giveChange(cost, paid, client);
-        System.out.println("Till + "+cost+" -> "+currentBar.getTillBalance());
+        System.out.println("    # Till + "+cost+" -> "+currentBar.getTillBalance());
         speak("Here is your receipt", null);
         client.speak("Thank you", null);
     }
@@ -160,7 +152,7 @@ public class Barman extends Human implements Employee {
     public void giveChange(double cost, double give, Client client) {
         double change = give - cost;
         client.wallet += change; // can access whitout getWallet => pb
-        System.out.println(client.name+" "+client.surname+" paid: "+ cost 
+        System.out.println("    # "+client.name+" "+client.surname+" paid: "+ cost 
                 +" -> Remaining: " + wallet);
     }
     
@@ -188,10 +180,10 @@ public class Barman extends Human implements Employee {
         while (totalCost <= currentBar.getTillBalance() - 100) {
             // add wanted quantities and drinks' name to oder map        
             for (int i = 0; i<Bar.getDrinksMenu().size(); i++) {
-                if (currentBar.getStock(Bar.getDrinksMenu().get(i)) <= LOW_QUANTITY_LIMIT) {
+                if (currentBar.getStock(Bar.getDrinksMenu().get(i)) <= Bar.LOW_QUANTITY_LIMIT) {
                     totalCost += Bar.getDrinksMenu().get(i).getPurchasingPrice();
                     toOrder.put(Bar.getDrinksMenu().get(i).getName(),
-                            HIGH_QUANTITY_LIMIT - currentBar.getStock(Bar.getDrinksMenu().get(i)));
+                            Bar.HIGH_QUANTITY_LIMIT - currentBar.getStock(Bar.getDrinksMenu().get(i)));
                 }
             }
         }
@@ -229,7 +221,7 @@ public class Barman extends Human implements Employee {
             for (int j = 0; j < stockDrinks.size(); j ++) {
                 if (deliveryDrinks.contains(stockDrinks.get(j))) {
                 // add quantities until the limit to drinks that were delivered
-                    currentBar.getStocks().replace(stockDrinks.get(j), HIGH_QUANTITY_LIMIT);
+                    currentBar.getStocks().replace(stockDrinks.get(j), Bar.HIGH_QUANTITY_LIMIT);
                 }
             }
         }
@@ -281,4 +273,28 @@ public class Barman extends Human implements Employee {
         // no condition, is called after waiters
         return true;
     }
+    
+    // Management ------------
+    /**
+     * Run an action given probabilities between all this ones the barman can
+     * start alone.
+     * @param clients that are present in the pub
+     */
+    @Override
+    public void action(ArrayList<Client> clients) {
+        double randAction = Math.random();
+        // - drink non alcohol drinks
+        if (randAction >= 0.7) {
+            Drink drink = Bar.getDrinksMenu().get((int) (Math.random()*Bar.getDrinksMenu().size()));
+            if (drink.getAlcohol() == 0) drink(drink);
+        }
+        // - offer a drink to a client
+        else if (randAction < 0.1) {
+            if (clients.size()>0){
+                offerDrink(clients.get((int) (Math.random()*clients.size())));
+            }
+        }
+        // else do nothing
+    }
+    
 }           

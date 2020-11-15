@@ -10,7 +10,7 @@ package pubmanagement;
  *
  * @author eugenie_dalmas
  */
-public class MaleWaiter extends Waiter implements Gender {
+public class MaleWaiter extends Waiter {
     /**
      * Attribute that differenciate a male client from a female one.
      */
@@ -38,31 +38,9 @@ public class MaleWaiter extends Waiter implements Gender {
      */
     @Override
     public void speak(String message, Human to) {
-        System.out.println();
+        //System.out.println();
         System.out.print("< Waiter ");
         super.speak(message, to);
-    }
-    
-    // Gender -------------------
-    /**
-     * Tell of what gender is the waiter.
-     * @return male
-     */
-    @Override
-    public String tellGender() {
-        return "male";
-    }
-    
-    /**
-     * Change the gender of the waiter.
-     * @return FemaleWaiter
-     */
-    @Override
-    public Waiter changeGender() {
-        // get current attributes and create a new FemaleWaiter
-        return new FemaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
-        this.biceps);
-        // need to remove from list of employee the previous one
     }
     
     // Employee ----------------

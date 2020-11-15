@@ -6,6 +6,8 @@
 
 package pubmanagement;
 
+import Exceptions.DoesNotExistException;
+import Exceptions.MaxCapacityReachedException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,6 +15,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,6 +47,14 @@ public class Bar {
     public static ArrayList<String> COLORS;
     
     /**
+     * Fixed limits.
+     */
+    public static final int NB_TABLES_LIMIT = 8;
+    public static final int LOW_QUANTITY_LIMIT = 3;
+    public static final int HIGH_QUANTITY_LIMIT = 20;
+    public static final double TILL_LIMIT = 250;
+    
+    /**
      * Name of the pub.
      * (Should be defined by the user)
      */
@@ -59,7 +70,7 @@ public class Bar {
     private ArrayList<Employee> employees = new ArrayList<>();
     /**
      * Possible clients of the bar.
-     * (Is like the population that has acces to bars as clients)
+     * (Is like the population that has access to bars as clients)
      */
     private ArrayList<Client> clients = new ArrayList<>();
     /**
@@ -79,7 +90,7 @@ public class Bar {
     /**
      * Stocks (name, quantity) of each drink of the drinksMenu.
      */
-    private Map<String, Integer> stocks;
+    private Map<String, Integer> stocks = new HashMap<String, Integer>();
     
     
     /**
@@ -88,18 +99,18 @@ public class Bar {
      */
     public Bar(String name) {
         this.name = name;
-        this.till = Math.random()*200;
+        this.till = (int) (Math.random()*200);
         
         this.init();
     }
     
     
-    // ----- Add (user) -----
+    // ----- Add/Remove (user) -----
     /**
      * Add a new waiter to the bar.
      * @param waiter : new instance
      */
-    private void addWaiter(Waiter waiter) {
+    public void addWaiter(Waiter waiter) {
         this.employees.add(waiter);
     }
     
@@ -107,30 +118,47 @@ public class Bar {
      * Add a new barman to the bar.
      * @param barman 
      */
-    private void addBarman(Barman barman) {
+    public void addBarman(Barman barman) {
         this.employees.add(barman);
+    }
+    
+    /**
+     * Remove a client from the clients list.
+     * @param employee
+     * @return 
+     */
+    public Boolean removeEmployee(Employee employee) {
+        return employees.remove(employee);
     }
     
     /**
      * Add a new client to the bar.
      * @param client 
      */
-    private void addClient(Client client) {
+    public void addClient(Client client) {
         this.clients.add(client);
     }
     
     /**
-     * Add new tables to the pub.
-     * @param amount of tables to add
+     * Remove a client from the clients list.
+     * @param client
+     * @return 
      */
-    private void addTables(int amount) {
-        Client[] table = new Client[6];
-        // add empty tables
-        for(int i = 0; i<amount; i++) {
-            this.tables.add(table);
-        }
+    public Boolean removeClient(Client client) {
+        return clients.remove(client);
     }
     
+    /**
+     * Add new tables to the pub.
+     * @throws Exceptions.MaxCapacityReachedException
+     */
+    public void addTables() throws MaxCapacityReachedException {
+        if (tables.size() == NB_TABLES_LIMIT) {
+            throw new MaxCapacityReachedException("Max number of tables already reached, "
+            + "cannot add more.");
+        }
+        this.tables.add(new Client[4]);
+    }
     
     // ----- Displays (user) -----
     /**
@@ -138,8 +166,8 @@ public class Bar {
      */
     public void displayDrinksMenu() {
         System.out.println("Drinks menu !");
-        for(int i = 0; i<Bar.drinksMenu.size(); i++) {
-            System.out.println(" . " + Bar.drinksMenu.get(i).getName());
+        for(int i = 0; i<drinksMenu.size(); i++) {
+            System.out.println(" . " + drinksMenu.get(i).getName());
         }
     }
     
@@ -184,12 +212,16 @@ public class Bar {
                 ));
             }
         }
+        // Stocks
+        for (int i = 0; i<drinksMenu.size(); i++) stocks.put(drinksMenu.get(i).getName(), HIGH_QUANTITY_LIMIT);
+        
+        // Humans :
         // - Boss
         this.boss = new Boss (
                 this,
                 Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
                 Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-                Math.random()*200,
+                (int) (Math.random() * 200),
                 (int) (Math.random()*10),
                 Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
                 Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
@@ -202,7 +234,7 @@ public class Bar {
             this,
             Bar.MALE_NAMES.get((int) (Math.random()*Bar.MALE_NAMES.size())),
             Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-            Math.random()*200,
+            (int) (Math.random() * 200),
             (int) (Math.random()*10),
             Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
             (int) (Math.random()*10)
@@ -212,7 +244,7 @@ public class Bar {
             this,
             Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
             Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-            Math.random()*200,
+            (int) (Math.random() * 200),
             (int) (Math.random()*10),
             Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
             (int) (Math.random()*10)
@@ -222,7 +254,7 @@ public class Bar {
             this,
             Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
             Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-            Math.random()*200,
+            (int) (Math.random() * 200),
             (int) (Math.random()*10),
             Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size()))
         )); 
@@ -235,8 +267,8 @@ public class Bar {
                 this.clients.add(new MaleClient(
                     this,
                     Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
-                    Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-                    Math.random()*200,
+                    Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())), 
+                    (int) (Math.random() * 200),
                     (int) (Math.random()*10),
                     Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
                     Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
@@ -254,7 +286,7 @@ public class Bar {
                     this,
                     Bar.MALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
                     Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
-                    Math.random()*200,
+                    (int) (Math.random() * 200),
                     (int) (Math.random()*10),
                     Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
                     Bar.drinksMenu.get((int) (Math.random()*Bar.drinksMenu.size())),
@@ -388,7 +420,7 @@ public class Bar {
         // get every client at a table
         this.tables.forEach(table -> {
             for (int i = 0; i<table.length; i++) {
-                present.add(table[i]);
+                if (table[i]!= null) present.add(table[i]);
             }
         });
         return present;
@@ -439,6 +471,27 @@ public class Bar {
      * @return 
      */
     public static ArrayList<Drink> getDrinksMenu() {
-        return Bar.drinksMenu;
+        return drinksMenu;
+    }
+    
+    /**
+     * Get the drink Object from its name.
+     * @param name
+     * @return the Drink
+     * @throws DoesNotExistException if the name is not one of the existant drinks.
+     */
+    public static Drink getDrink(String name) throws DoesNotExistException {
+        ArrayList<String> drinkNames = new ArrayList<>();
+        for(int i = 0; i<drinksMenu.size(); i++) {
+            drinkNames.add(drinksMenu.get(i).getName());
+        }
+        if (!drinkNames.contains(name)) {
+            throw new DoesNotExistException("The drink does not exist in the drink menu.");
+        }
+        
+        for (int i = 0; i<drinksMenu.size(); i++) {
+            if (drinksMenu.get(i).getName().equals(name)) return drinksMenu.get(i);
+        }
+        return null; // if not found but should not append
     }
 }

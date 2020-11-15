@@ -18,7 +18,6 @@ public interface Gender {
     
     /**
      * Change the gender of the human.
-     * @return 
      */
-    Human changeGender();
+    void changeGender();
 }

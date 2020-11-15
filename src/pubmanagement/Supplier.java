@@ -6,6 +6,7 @@
 
 package pubmanagement;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ public class Supplier extends Human {
         super(bar, name, surname, wallet, popularity, shout);
     }
     
- // throw error ?
+ // throw error ? or "// does nothing"
     @Override
     void drink(Drink drink) {
         throw new UnsupportedOperationException("Can't drink.");
@@ -38,6 +39,12 @@ public class Supplier extends Human {
     public void offerDrink(Client to) {
         throw new UnsupportedOperationException("Can't offer drink.");
     }
+    
+    @Override
+    public void action(ArrayList<Client> clients) {
+        throw new UnsupportedOperationException("Does not have actions he can start alone");
+    }
+
  // --------------
     
     /**

@@ -6,6 +6,7 @@
 
 package pubmanagement;
 
+import Exceptions.DoesNotExistException;
 import java.util.ArrayList;
 //import java.time.LocalTime;
 
@@ -13,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author eugenie_dalmas
  */
-abstract public class Waiter extends Human implements Employee {
+abstract public class Waiter extends Human implements Employee, Gender {
     
     /**
      * Constructor.
@@ -34,11 +35,11 @@ abstract public class Waiter extends Human implements Employee {
      */
     @Override
     void drink(Drink drink) {
-        if (!drink.getName().equals("water")) {
+        if (!drink.getName().equals("Water")) {
             speak("I can't drink "+drink.getName()+", this is not water.", null);
         }
         else {
-            drink(drink);
+            speak("A little water sure helps", null);
         }
     }
     
@@ -49,12 +50,11 @@ abstract public class Waiter extends Human implements Employee {
      */
     @Override
     public void speak(String message, Human to) {
-        System.out.println();
         System.out.print(this.name+" > ");
         if (to!= null) {
             System.out.print(to.getName()+", ");
         }
-        System.out.print(message);
+        System.out.println(message);
     }
     
     /**
@@ -164,4 +164,67 @@ abstract public class Waiter extends Human implements Employee {
         speak("You should stop drinking for now paw.", null);
         return false;
     }
+    
+    // Gender ------------
+    /**
+     * Tell of what gender is the waiter.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        if (this instanceof FemaleWaiter) {
+            return "female";
+        }
+        else {
+            return "male";
+        }
+    }
+    
+    /**
+     * Change the gender of the waiter.
+     */
+    @Override
+    public void changeGender() {
+        Waiter newThis = this;
+        // get infos and create a new Male/Female-Waiter 
+        if (this instanceof FemaleWaiter waiter) {
+            newThis = new MaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
+                    waiter.getCharm());
+        }
+        else if (this instanceof MaleWaiter waiter) {
+            newThis = new FemaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
+                    waiter.getBiceps());
+        }
+        // then replace the obsolete one
+        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
+    }
+    
+    // Management ----------
+    /**
+     * Run an action given probabilities between all the ones the waiter can 
+     * start alone.
+     * @param clients that are present in the pub.
+     */
+    @Override
+    public void action(ArrayList<Client> clients) {
+        double randAction = Math.random();
+        // - drink water
+        if (randAction >= 0.7) {
+            try {
+                drink(Bar.getDrink("Water"));
+            }
+            catch (DoesNotExistException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        // - offer a drink to a client
+        else if (randAction < 0.1) {
+            if (clients.size()>0){
+                offerDrink(clients.get((int) (Math.random()*clients.size())));
+            }
+        }
+        // else do nothing
+    }
+    
+    
 }

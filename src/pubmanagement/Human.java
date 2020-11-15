@@ -6,7 +6,9 @@
 
 package pubmanagement;
 
+import Exceptions.SelfInteractionException;
 import java.time.*;
+import java.util.ArrayList;
 
 /**
  *
@@ -79,13 +81,11 @@ public abstract class Human {
      * @param to ; is null when speaking to no one in particular
      */
     public void speak(String message, Human to) {
-        System.out.println();
         System.out.print("< "+this.name+" > ");
         if (to!= null) {
             System.out.print(to.getName()+", ");
         }
-        System.out.print(message);
-        System.out.println();
+        System.out.println(message);
     }
     
     /**
@@ -95,16 +95,22 @@ public abstract class Human {
      */
     public double pay(double cost) {
         this.wallet -= cost;
-        System.out.println(this.name+" "+this.surname+" paid: "+ cost 
-                +" -> Remaining: " + this.wallet);
         return cost;
     }
     
     /**
      * Buy a drink for another fellow human and maybe change its popularity.
      * @param to the human that receive the drink
+     * @throws Exceptions.SelfInteractionException
      */
-    public abstract void offerDrink(Client to);
+    public abstract void offerDrink(Client to) throws SelfInteractionException;
+    
+    /**
+     * Run an action given probabilities between all the ones the human can 
+     * start alone.
+     * @param clients that are present in the pub
+     */
+    public abstract void action(ArrayList<Client> clients);
     
     /**
      * Refuse politly the drink offer.
@@ -180,13 +186,5 @@ public abstract class Human {
      */
     public String getShout() {
         return this.shout;
-    }
-    
-    /**
-     * Get the date of the last action.
-     * @return a LocalTime
-     */
-    public LocalTime getDateLastAction() {
-        return this.dateLastAction;
     }
 }
