@@ -56,7 +56,7 @@ public class Barman extends Human implements Employee {
         }
         else {
             if (takeFromStock(drink)) { // remove from stocks
-                drink(drink);
+                speak("A "+ drink.getName()+", how refreshing", null);
             }
         }
     }
@@ -89,7 +89,7 @@ public class Barman extends Human implements Employee {
         speak("I'll offer you a drink. What's your favorite one ?", to);
         // if accept
         if (rand2 <= 0.5) {
-            to.speak("I like "+drink, null);
+            to.speak("I like "+drink.getName(), null);
             to.takeDrinkOffer(drink, this);
             // pay the drink
             if (!serve(drink, to)) {
@@ -201,6 +201,8 @@ public class Barman extends Human implements Employee {
         int oldValue = currentBar.getStocks().get(drink.getName());
         if (oldValue == 0) {
             speak("There's no more " + drink.getName() + "... We'll have to order soon", null);
+            currentBar.setRunOutDrinks(currentBar.getRunOutDrinks() + 1);
+            if (currentBar.getRunOutDrinks() == 3) orderSupply(Bar.getSupplier());
             return false;
         }
         else {
@@ -259,6 +261,8 @@ public class Barman extends Human implements Employee {
     @Override
     public Boolean kickOut(Client client) {
         // no conditions, is called after waiters
+        speak("Sorry paw but you need to leave now.", null);
+        client.speak("Alright, alright, I'll leave...", null);
         return true;
     }
     
@@ -271,6 +275,8 @@ public class Barman extends Human implements Employee {
     public Boolean sayStop(Client client) {
         speak("You should stop drinking for now paw.", null);
         // no condition, is called after waiters
+        client.speak("Alright, alright, I'll stop...", null);
+        client.setRedFlag(true);
         return true;
     }
     
@@ -295,6 +301,19 @@ public class Barman extends Human implements Employee {
             }
         }
         // else do nothing
+    }
+    
+    /**
+     * Displays all the informations on the barman for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public void displayInformation() {
+        System.out.println("[Barman]    "+name+" "+surname);
+        System.out.println("    Wallet balance: "+wallet);
+        System.out.println("    Popularity: "+popularity);
+        System.out.println("    Work in "+currentBar.getName());
+        System.out.println("    Allowed drinks: Non alcoholic drinks");
     }
     
 }           

@@ -38,6 +38,30 @@ public class FemaleClient extends Client {
         this.accessories = accessories;
     }
     
+    // Gender ------------
+    /**
+     * Tell of what gender is the client.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        return "female";
+    }
+    
+    /**
+     * Change the gender of the client.
+     */
+    @Override
+    public void changeGender() {
+        String color = Bar.COLORS.get((int) (Math.random()*Bar.COLORS.size()));
+        String teeShirt = color + " tee-shirt";
+        Client newThis = new MaleClient(this.currentBar,this.name, this.surname, this.wallet, 
+                this.popularity, this.shout, this.favoriteDrink, 
+                this.favoriteDrink2nd, this.beloteLevel, teeShirt);
+        // then replace the obsolete one
+        if (currentBar.removeClient(this)) currentBar.addClient(newThis);
+    }
+    
     // ----- Getters -----
     /**
      * Get the accessories list.

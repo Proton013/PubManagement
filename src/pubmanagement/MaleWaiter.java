@@ -6,6 +6,8 @@
 
 package pubmanagement;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author eugenie_dalmas
@@ -43,6 +45,27 @@ public class MaleWaiter extends Waiter {
         super.speak(message, to);
     }
     
+    // Gender ------------
+    /**
+     * Tell of what gender is the client.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        return "male";
+    }
+    
+    /**
+     * Change the gender of the waiter.
+     */
+    @Override
+    public void changeGender() {
+        Waiter newThis = new FemaleWaiter(this.currentBar, this.name, this.surname,
+                this.wallet, this.popularity, this.shout, getBiceps());
+        // then replace the obsolete one
+        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
+    }
+    
     // Employee ----------------
     /**
      * Try to kick a client out of the pub depending on the employee's ability 
@@ -73,6 +96,7 @@ public class MaleWaiter extends Waiter {
         super.sayStop(client);
         if (this.biceps > client.getPopularity()) {
             client.speak("Alright, alright, I'll stop...", null);
+            client.setRedFlag(true);
             return true;
         }
         else {

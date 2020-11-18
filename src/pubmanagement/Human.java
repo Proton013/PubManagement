@@ -7,14 +7,13 @@
 package pubmanagement;
 
 import Exceptions.SelfInteractionException;
-import java.time.*;
 import java.util.ArrayList;
 
 /**
  *
  * @author eugenie_dalmas
  */
-public abstract class Human {
+public abstract class Human implements InformationDisplayer {
     
     /**
      * Possible introductions seperated by a coma.
@@ -106,13 +105,6 @@ public abstract class Human {
     public abstract void offerDrink(Client to) throws SelfInteractionException;
     
     /**
-     * Run an action given probabilities between all the ones the human can 
-     * start alone.
-     * @param clients that are present in the pub
-     */
-    public abstract void action(ArrayList<Client> clients);
-    
-    /**
      * Refuse politly the drink offer.
      * @param from 
      */
@@ -131,21 +123,20 @@ public abstract class Human {
         speak(intro[randomInt]+", I'm "+this.name+" "+this.surname, null);
     }
     
+    // Management ----------
     /**
-     * Tell if the human is occupied.
-     * For now, every action takes the same amount of time to be done
-     * @return true if he is still doing an action
+     * Run an action given probabilities between all the ones the human can 
+     * start alone.
+     * @param clients that are present in the pub
      */
-    /*public Boolean isOccupied() {
-        Duration timeItTakes = Duration.ZERO.plusSeconds(6);
-        Duration duration = Duration.between(LocalTime.now(), this.dateLastAction);
-        if (duration.compareTo(timeItTakes) >= 0) {
-            return false;
-        }
-        else {
-            return false;
-        }
-    }*/
+    public abstract void action(ArrayList<Client> clients);
+    
+    /**
+     * Displays all the informations on the human for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public abstract void displayInformation();
     
     // ----- Getters -----
     /**

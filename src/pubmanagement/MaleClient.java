@@ -6,6 +6,8 @@
 
 package pubmanagement;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author eugenie_dalmas
@@ -36,6 +38,29 @@ public class MaleClient extends Client {
         super(bar, name, surname, wallet, popularity, shout, favoriteDrink, 
                 favoriteDrink2nd, beloteLevel);
         this.teeShirt = teeShirt;
+    }
+    
+    // Gender ------------
+    /**
+     * Tell of what gender is the client.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+            return "male";
+    }
+    
+    /**
+     * Change the gender of the client.
+     */
+    @Override
+    public void changeGender() {
+        ArrayList<String> accessories = new ArrayList<>(); // random to found
+        Client newThis = new FemaleClient(this.currentBar, this.name, this.surname, this.wallet, 
+                this.popularity, this.shout, this.favoriteDrink, 
+                this.favoriteDrink2nd, this.beloteLevel, accessories);
+        // then replace the obsolete one
+        if (currentBar.removeClient(this)) currentBar.addClient(newThis);
     }
     
     // ----- Getters -----

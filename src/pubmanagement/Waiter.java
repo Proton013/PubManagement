@@ -72,7 +72,7 @@ abstract public class Waiter extends Human implements Employee, Gender {
         speak("I'll offer you a drink. What's your favorite one ?", to);
         // if accept
         if (rand2 <= 0.5) {
-            to.speak("I like "+drink, null);
+            to.speak("I like "+drink.getName(), null);
             to.takeDrinkOffer(drink, this);
             // pay the drink
             if (!serve(drink, to)) {
@@ -111,7 +111,7 @@ abstract public class Waiter extends Human implements Employee, Gender {
             barman.aksToPay(drink.getSellingPrice(), to);
               // serve the drink
             speak("Here is your order !", null);
-            to.speak("Thanks.", null);
+            to.speak("Thanks", null);
             return true;
         }
         else {
@@ -127,8 +127,6 @@ abstract public class Waiter extends Human implements Employee, Gender {
      * @param drink that is served
      * @param clients that are present in the bar
      */
-    // We supppose that the employee stop what they were initially doing 
-    // thus no use of the dateLastAction
     public static void serveRound(Bar bar, Drink drink, ArrayList<Client> clients) {
         for (int i = 0; i<clients.size(); i++) {
             Waiter waiter = bar.getWaiters().get(i %bar.getWaiters().size());
@@ -148,7 +146,6 @@ abstract public class Waiter extends Human implements Employee, Gender {
      */
     @Override
     public Boolean kickOut(Client client) {
-        //setDateLastAction(LocalTime.now());
         speak("Sorry paw but you need to leave now.", null);
         return false;
     }
@@ -160,7 +157,6 @@ abstract public class Waiter extends Human implements Employee, Gender {
      */
     @Override
     public Boolean sayStop(Client client) {
-        //setDateLastAction(LocalTime.now());
         speak("You should stop drinking for now paw.", null);
         return false;
     }
@@ -171,33 +167,13 @@ abstract public class Waiter extends Human implements Employee, Gender {
      * @return the string female or male
      */    
     @Override
-    public String tellGender() {
-        if (this instanceof FemaleWaiter) {
-            return "female";
-        }
-        else {
-            return "male";
-        }
-    }
+    public abstract String tellGender();
     
     /**
      * Change the gender of the waiter.
      */
     @Override
-    public void changeGender() {
-        Waiter newThis = this;
-        // get infos and create a new Male/Female-Waiter 
-        if (this instanceof FemaleWaiter waiter) {
-            newThis = new MaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
-                    waiter.getCharm());
-        }
-        else if (this instanceof MaleWaiter waiter) {
-            newThis = new FemaleWaiter(this.currentBar, this.name, this.surname, this.wallet, this.popularity, this.shout,
-                    waiter.getBiceps());
-        }
-        // then replace the obsolete one
-        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
-    }
+    public abstract void changeGender();
     
     // Management ----------
     /**
@@ -224,6 +200,20 @@ abstract public class Waiter extends Human implements Employee, Gender {
             }
         }
         // else do nothing
+    }
+    
+    /**
+     * Displays all the informations on the waiter for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public void displayInformation() {
+        System.out.println("[Waiter]    "+name+" "+surname);
+        System.out.println("   "+tellGender());
+        System.out.println("    Wallet balance: "+wallet);
+        System.out.println("    Popularity: "+popularity);
+        System.out.println("    Work in "+currentBar.getName());
+        System.out.println("    Allowed drinks: Water");
     }
     
     

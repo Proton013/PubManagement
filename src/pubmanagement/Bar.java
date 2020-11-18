@@ -22,7 +22,7 @@ import java.util.Map;
  *
  * @author eugenie_dalmas
  */
-public class Bar {
+public class Bar implements InformationDisplayer {
     
     /**
      * Path names of the initiation files 
@@ -49,10 +49,12 @@ public class Bar {
     /**
      * Fixed limits.
      */
-    public static final int NB_TABLES_LIMIT = 8;
     public static final int LOW_QUANTITY_LIMIT = 3;
     public static final int HIGH_QUANTITY_LIMIT = 20;
     public static final double TILL_LIMIT = 250;
+    public static final int TABLES_LIMIT = 8;
+    public static final int EMPLOYEE_LIMIT = 10;
+    public static final int CLIENT_LIMIT = TABLES_LIMIT*4;
     
     /**
      * Name of the pub.
@@ -64,6 +66,10 @@ public class Bar {
      * (is always female)
      */
     private Boss boss;
+    /**
+     * Supplier of all bars.
+     */
+    private static Supplier supplier;
     /**
      * Employee list with all instanciated employee of the this bar.
      */
@@ -91,7 +97,10 @@ public class Bar {
      * Stocks (name, quantity) of each drink of the drinksMenu.
      */
     private Map<String, Integer> stocks = new HashMap<String, Integer>();
-    
+    /**
+     * Number of drinks that ran out in stockfor this bar.
+     */
+    private int runOutDrinks = 0;
     
     /**
      * Constructor
@@ -153,7 +162,7 @@ public class Bar {
      * @throws Exceptions.MaxCapacityReachedException
      */
     public void addTables() throws MaxCapacityReachedException {
-        if (tables.size() == NB_TABLES_LIMIT) {
+        if (tables.size() == TABLES_LIMIT) {
             throw new MaxCapacityReachedException("Max number of tables already reached, "
             + "cannot add more.");
         }
@@ -182,6 +191,42 @@ public class Bar {
         System.out.println("* * *    * * *");
     }
     
+    /**
+     * Displays all the informations on the waiter for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public void displayInformation() {
+        System.out.println("[Pub]   "+name);
+        System.out.println("    Boss: "+getBoss().getName()+" "+getBoss().getSurname());
+        System.out.println("    Till balance: "+till);
+        System.out.println("    Number of employees: "+getEmployees().size() +" / "+ EMPLOYEE_LIMIT);
+        System.out.println("        -> Waiters: "+getWaiters().size());
+        System.out.println("        -> Barmans: "+getBarmans().size());
+        System.out.println("    Number of present clients: "+getPresentClients().size() +" / "+ CLIENT_LIMIT);
+        System.out.println("    Number of tables: "+getTables().size() +" / "+ TABLES_LIMIT);
+    }
+    
+    public void displayClients() {
+        System.out.println("Clients :");
+        for (int i = 0; i<clients.size(); i++) {
+            System.out.println("["+i+"] "+clients.get(i).getName()+" "+clients.get(i).getSurname());
+        }
+    }
+    
+    public void displayWaiters() {
+        System.out.println("Waiters :");
+        for (int i = 0; i<getWaiters().size(); i++) {
+            System.out.println("["+i+"] "+getWaiters().get(i).getName()+" "+getWaiters().get(i).getSurname());
+        }
+    }
+    
+    public void displayBarmans() {
+        System.out.println("Barmans :");
+        for (int i = 0; i<getBarmans().size(); i++) {
+            System.out.println("["+i+"] "+getBarmans().get(i).getName()+" "+getBarmans().get(i).getSurname());
+        }
+    }
     
     // ---- Initiation -----    
     /**
@@ -266,7 +311,7 @@ public class Bar {
             if (rand < 0.5) {
                 this.clients.add(new MaleClient(
                     this,
-                    Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                    Bar.MALE_NAMES.get((int) (Math.random()*Bar.MALE_NAMES.size())),
                     Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())), 
                     (int) (Math.random() * 200),
                     (int) (Math.random()*10),
@@ -284,7 +329,7 @@ public class Bar {
                 }
                 this.clients.add(new FemaleClient(
                     this,
-                    Bar.MALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                    Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
                     Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
                     (int) (Math.random() * 200),
                     (int) (Math.random()*10),
@@ -296,6 +341,15 @@ public class Bar {
                 )); 
             }
         }
+        // - Supplier
+        Bar.supplier = new Supplier(
+                this,
+                Bar.FEMALE_NAMES.get((int) (Math.random()*Bar.FEMALE_NAMES.size())),
+                Bar.SURNAMES.get((int) (Math.random()*Bar.SURNAMES.size())),
+                (int) (Math.random() * 200),
+                (int) (Math.random()*10),
+                Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size()))
+        );
     }
     
     // ----- Loaders ----- (for initiating every starting attributes)
@@ -361,6 +415,14 @@ public class Bar {
         this.till = NewBalance;
     }
     
+    /**
+     * Set the number of drinks that ran out in stocks.
+     * @param number integer to set
+     */
+    public void setRunOutDrinks(int number) {
+        this.runOutDrinks = number;
+    }
+    
     // ----- Getters -----    
     /**
      * Get the name of this bar.
@@ -393,6 +455,14 @@ public class Bar {
      */
     public int getStock(Drink drink) {
         return this.getStocks().get(drink.getName());
+    }
+    
+    /**
+     * Get the number of drinks that ran out in stocks.
+     * @return the integer number
+     */
+    public int getRunOutDrinks() {
+        return runOutDrinks;
     }
     
     /**
@@ -464,6 +534,10 @@ public class Bar {
      */
     public Boss getBoss() {
         return this.boss;
+    }
+    
+    public static Supplier getSupplier() {
+        return supplier;
     }
     
     /**

@@ -29,20 +29,34 @@ public class Supplier extends Human {
         super(bar, name, surname, wallet, popularity, shout);
     }
     
+    /**
+     * Announce the speaker for the user and write the wanted message.
+     * @param message to be said
+     * @param to ; is null when speaking to no one in particular
+     */
+    @Override
+    public void speak(String message, Human to) {
+        System.out.print("< Supplier "+this.name+" > ");
+        if (to!= null) {
+            System.out.print(to.getName()+", ");
+        }
+        System.out.println(message);
+    }
+    
  // throw error ? or "// does nothing"
     @Override
     void drink(Drink drink) {
-        throw new UnsupportedOperationException("Can't drink.");
+        throw new UnsupportedOperationException("Suuplier cannot drink.");
     }
 
     @Override
     public void offerDrink(Client to) {
-        throw new UnsupportedOperationException("Can't offer drink.");
+        throw new UnsupportedOperationException("Supplier cannot offer drink.");
     }
     
     @Override
     public void action(ArrayList<Client> clients) {
-        throw new UnsupportedOperationException("Does not have actions he can start alone");
+        throw new UnsupportedOperationException("Supplier does not have actions he can start alone");
     }
 
  // --------------
@@ -67,5 +81,18 @@ public class Supplier extends Human {
         // barman give money right from till
         barman.pay(totalCost);
     }
-
+    
+    // Management -------------
+    /**
+     * Displays all the informations on the barman for the user.
+     * Used in the management class for Information menu
+     */
+    public void displayInformation() {
+        System.out.println("[Supplier]  "+name+" "+surname);
+        System.out.println("    Wallet balance: "+wallet);
+        System.out.println("    Popularity: "+popularity);
+        System.out.println("    Work for "+currentBar.getName());
+        System.out.println("    Allowed drinks: None");
+    }
+    
 }

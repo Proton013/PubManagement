@@ -43,6 +43,27 @@ public class FemaleWaiter extends Waiter {
         super.speak(message, to);
     }
     
+    // Gender ------------
+    /**
+     * Tell of what gender is the waiter.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        return "female";
+    }
+    
+    /**
+     * Change the gender of the waiter.
+     */
+    @Override
+    public void changeGender() {
+        Waiter newThis = new MaleWaiter(this.currentBar, this.name, this.surname,
+                    this.wallet, this.popularity, this.shout, getCharm());
+        // then replace the obsolete one
+        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
+    }
+    
     // Employee -----------
     /**
      * Try to kick a client out of the pub depending on the employee's ability 
@@ -55,6 +76,7 @@ public class FemaleWaiter extends Waiter {
         super.kickOut(client);
         if (this.charm > client.getPopularity()) {
             client.speak("Alright, alright, I'll leave...", null);
+            client.setRedFlag(true);
             return true;
         }
         else {

@@ -7,8 +7,6 @@
 package pubmanagement;
 
 import Exceptions.SelfInteractionException;
-
-import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -52,6 +50,11 @@ abstract public class Client extends Human implements Gender {
     private Boolean isIn = false;
     
     /**
+     * Flag that is true when the client has been asked to stop drinking successfully.
+     */
+    private Boolean redFlag = false;
+    
+    /**
      * Constructor that extends Human constructor.
      * @param bar
      * @param name
@@ -93,13 +96,19 @@ abstract public class Client extends Human implements Gender {
      * @param to someone ; is null when speaking to no one in particular
      */
     public void speakTipsy(String message, Human to) {
-        super.speak(message, null);
+        System.out.print("< "+this.name+" > ");
+        if (to!= null) {
+            System.out.print(to.getName()+", ");
+        }
         if (to instanceof MaleClient || to instanceof MaleWaiter) {
-            System.out.print(" handsome");
+            System.out.print(message);
+            System.out.println(" handsome");
         }
         else if (to instanceof FemaleClient || to instanceof FemaleWaiter) {
-            System.out.print(" sweet heart");
+            System.out.print(message);
+            System.out.println(" sweet heart");
         }
+        else System.out.println(message);
         // not usually appreciated
         double rand = Math.random();
         if (rand <= 0.03) this.popularity -= 1;
@@ -111,9 +120,12 @@ abstract public class Client extends Human implements Gender {
      */
     @Override
     public void drink(Drink drink) {
-        this.alcoholLevel += drink.alcohol;
+        // drink a non alcoholic drink help to sober up
+        if (drink.getAlcohol() == 0 && alcoholLevel != 0) alcoholLevel -= 1;
+        else alcoholLevel += (int) (drink.alcohol/3);
         
-        if (alcoholLevel >= ALCOHOL_THRESHOLD) {
+        if (alcoholLevel == 10) currentBar.getBoss().orderKickOut(this);
+        else if (alcoholLevel >= ALCOHOL_THRESHOLD) {
             // is drunk, employee immediatly spot him
             currentBar.getBoss().orderStop(this);
         }
@@ -145,11 +157,11 @@ abstract public class Client extends Human implements Gender {
         speak("I'll offer you a drink. What's your favorite one ?", to);
         // if accept
         if (rand2 <= 0.5) {
-            to.speak("I like "+drink, null);
+            to.speak("I like "+drink.getName(), null);
             // pay the drink
             if (!orderDrink(drink)) {
                 // try with 2nd drink
-                speak("I'll ask for another drink", null);
+                speak("Oh this one won't do, Ill ask for another drink", null);
                 drink = to.favoriteDrink2nd;
                 if (!orderDrink(drink)) {
                     speak("seems like I can't buy you this drink...", to);
@@ -266,25 +278,27 @@ abstract public class Client extends Human implements Gender {
      * Enters the pub.
      */
     public void enterPub() {
-        System.out.println("!!!! in enter pub method !!!!");
         // added to the tables if not already in the pub
-        while (!isIn) {
-            for(int i = 0; i<currentBar.getTables().size(); i++) {
-                for (int j = 0; j<currentBar.getTables().get(i).length; j++) {
-                    if (currentBar.getTables().get(i)[j] == null) {
-                        currentBar.getTables().get(i)[j] = this;
-                        this.isIn = true;
-                    }
+        isIn = goToTable();
+        if (!isIn) System.out.println("("+this.name+" "+this.surname
+                    +" tried to join but the pub is full)");
+        else System.out.println(this.name+" "+this.surname+" joined");
+    }
+    
+    /**
+     * Choose a table for the client and add this to an empty seat.
+     * @return true if a seat is available and the client sat successfully
+     */
+    public Boolean goToTable() {
+        for (int i = 0; i<currentBar.getTables().size(); i++) {
+            for (int j = 0; j<4; j++) {
+                if (currentBar.getTables().get(i)[j] == null) {
+                    currentBar.getTables().get(i)[j] = this;
+                    return true;
                 }
             }
         }
-        if (!isIn) {
-            System.out.println("("+this.name+" "+this.surname
-                    +" tried to join but the pub is full)");
-        }
-        else {
-            System.out.println(this.name+" "+this.surname+" joined");
-        }
+        return false;
     }
     
     /**
@@ -297,6 +311,7 @@ abstract public class Client extends Human implements Gender {
             if (employee instanceof Barman barman && bill != 0) {
                 barman.aksToPay(bill, this);
             }
+            i++;
         }
         // removed from the tables
         for(i = 0; i<currentBar.getTables().size(); i++) {
@@ -329,38 +344,13 @@ abstract public class Client extends Human implements Gender {
      * @return the string female or male
      */    
     @Override
-    public String tellGender() {
-        if (this instanceof FemaleClient) {
-            return "female";
-        }
-        else {
-            return "male";
-        }
-    }
+    public abstract String tellGender();
     
     /**
      * Change the gender of the client.
      */
     @Override
-    public void changeGender() {
-        Client newThis = this;
-        // get infos and create a new Male/Female-Waiter 
-        if (this instanceof FemaleClient) {
-            String color = Bar.COLORS.get((int) (Math.random()*Bar.COLORS.size()));
-            String teeShirt = color + " tee-shirt";
-            newThis = new MaleClient(this.currentBar,this.name, this.surname, this.wallet, 
-                    this.popularity, this.shout, this.favoriteDrink, 
-                    this.favoriteDrink2nd, this.beloteLevel, teeShirt);
-        }
-        else if (this instanceof MaleClient) {
-            ArrayList<String> accessories = new ArrayList<>(); // random to found
-            newThis = new FemaleClient(this.currentBar, this.name, this.surname, this.wallet, 
-                    this.popularity, this.shout, this.favoriteDrink, 
-                    this.favoriteDrink2nd, this.beloteLevel, accessories);
-        }
-        // then replace the obsolete one
-        if (currentBar.removeClient(this)) currentBar.addClient(newThis);
-    }
+    public abstract void changeGender();
     
     // Management -----------
     /**
@@ -372,17 +362,19 @@ abstract public class Client extends Human implements Gender {
     public void action(ArrayList<Client> clients) {
         ArrayList<Waiter> waiters = currentBar.getWaiters();
         double randAction = Math.random();
+        if (alcoholLevel < ALCOHOL_THRESHOLD) redFlag = false;
         if (!getIsIn()) {
             // - enters pub
             if (randAction > 0.5) enterPub();
             // - change gender
             else if (randAction <= 0.01) {
                 changeGender();
+                System.out.println(name+" "+surname+" ceased to be a "+tellGender());
             }
         }
         else { // do one of the following actions
             // - order a drink
-            if (randAction >= 0.5) { 
+            if (randAction >= 0.5 && !redFlag) { 
                 if (!orderDrink(favoriteDrink)) {
                     orderDrink(favoriteDrink2nd);
                 }
@@ -400,7 +392,7 @@ abstract public class Client extends Human implements Gender {
                 }
                 else { // -- to waiter
                     // probability of offer differs on the waiters charm/bicep
-                    Waiter tmp = waiters.get((int) (Math.random()*clients.size()));
+                    Waiter tmp = waiters.get((int) (Math.random()*waiters.size()));
                     if (tmp instanceof FemaleWaiter to) {
                         // more likely to make an offer if charm is higher
                         if ((int) (Math.random()*10) <= to.getCharm()) offerDrink(to);
@@ -425,6 +417,30 @@ abstract public class Client extends Human implements Gender {
         }
     }
     
+    /**
+     * Displays all the informations on the client for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public void displayInformation() {
+        System.out.println("[Client]    "+name+" "+surname);
+        System.out.println("   "+tellGender());
+        System.out.println("    Wallet balance: "+wallet);
+        System.out.println("    Bill: "+bill);
+        System.out.println("    Popularity: "+popularity);
+        System.out.println("    Favorite drinks: "+favoriteDrink.getName()+" and "
+                + favoriteDrink2nd.getName());
+        System.out.println("    Alcohol level: "+alcoholLevel);
+        System.out.println("    Belote level: "+beloteLevel);
+        System.out.print("    Is in "+currentBar.getName()+": ");
+        if (isIn) System.out.println("Yes");
+        else System.out.println("No");
+    }
+    
+    // ----- Setters -----
+    public void setRedFlag(Boolean bool) {
+        this.redFlag = bool;
+    }
     
     // ----- Getters -----
     /**

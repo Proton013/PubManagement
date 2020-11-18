@@ -33,27 +33,51 @@ public class Boss extends Client {
     }
     
     /**
+     * Announce the speaker for the user and write the wanted message.
+     * @param message to be said
+     * @param to ; is null when speaking to no one in particular
+     */
+    @Override
+    public void speak(String message, Human to) {
+        if (this.alcoholLevel >= ALCOHOL_THRESHOLD - 4) {
+            speakTipsy(message, to);
+        }
+        else {
+            System.out.print("< Boss "+this.name+" > ");
+            if (to!= null) {
+                System.out.print(to.getName()+", ");
+            }
+            System.out.println(message);
+        }
+    }
+    
+    /**
      * Order an employee to stop a client from drinking.
      * @param client
      */
     public void orderStop(Client client) {
         Boolean outcome = false;
-        while (!outcome) {
-            // first ask waiters
-            for(int i = 0; i<currentBar.getWaiters().size(); i++) {
-                Waiter waiter = currentBar.getWaiters().get(i);
-                speak("Seems like "+client.getName()+" needs to slow down a little...", waiter);
-                waiter.speak("I'll take care of it boss", null);
-                outcome = waiter.sayStop(client); // result (success or failure)
-            }   
-            // then ask barmans
-            for(int i = 0; i<currentBar.getBarmans().size(); i++) {
-                Barman barman = currentBar.getBarmans().get(i);
-                speak("Seems like "+client.getName()+" needs to slow down a little...", barman);
-                barman.speak("I'll take care of it boss", null);
-                outcome = barman.sayStop(client); // result (success or failure)
-            }  
+        if (client == this) System.out.println("Wow I should slow down a bit...");
+        else {
+            speak("Seems like "+client.getName()+" needs to slow down a little...", null);
+            while (!outcome) {
+                // first ask waiters
+                for(int i = 0; i<currentBar.getWaiters().size(); i++) {
+                    Waiter waiter = currentBar.getWaiters().get(i);
+                    //speak("Seems like "+client.getName()+" needs to slow down a little...", waiter);
+                    waiter.speak("I'll take care of it boss", null);
+                    outcome = waiter.sayStop(client); // result (success or failure)
+                }   
+                // then ask barmans
+                for(int i = 0; i<currentBar.getBarmans().size(); i++) {
+                    Barman barman = currentBar.getBarmans().get(i);
+                    //speak("Seems like "+client.getName()+" needs to slow down a little...", barman);
+                    barman.speak("Let me take care of it boss", null);
+                    outcome = barman.sayStop(client); // result (success or failure)
+                }  
+            }
         }
+        
     }
     
     /**
@@ -62,22 +86,27 @@ public class Boss extends Client {
      */
     public void orderKickOut(Client client) {
         Boolean outcome = false;
-        while (!outcome) {
-            // first ask waiters
-            for(int i = 0; i<currentBar.getWaiters().size(); i++) {
-                Waiter waiter = currentBar.getWaiters().get(i);
-                speak("Seems like "+client.getName()+" should cool down outside...", waiter);
-                waiter.speak("I'll take care of it boss", null);
-                outcome = waiter.kickOut(client); // result (success or failure)
-            }   
-            // then ask barmans
-            for(int i = 0; i<currentBar.getBarmans().size(); i++) {
-                Barman barman = currentBar.getBarmans().get(i);
-                speak("Seems like "+client.getName()+" should cool down outside...", barman);
-                barman.speak("I'll take care of it boss", null);
-                outcome = barman.kickOut(client);
-            }  
+        if (client == this) System.out.println("Wow I'll soon need cool down outside a bit...");
+        else {
+            speak("Seems like "+client.getName()+" should cool down outside...", null);
+            while (!outcome) {
+                // first ask waiters
+                for(int i = 0; i<currentBar.getWaiters().size(); i++) {
+                    Waiter waiter = currentBar.getWaiters().get(i);
+                    //speak("Seems like "+client.getName()+" should cool down outside...", null);
+                    waiter.speak("I'll take care of it boss", null);
+                    outcome = waiter.kickOut(client); // result (success or failure)
+                }   
+                // then ask barmans
+                for(int i = 0; i<currentBar.getBarmans().size(); i++) {
+                    Barman barman = currentBar.getBarmans().get(i);
+                    //speak("Seems like "+client.getName()+" should cool down outside...", barman);
+                    barman.speak("Let me take care of it boss", null);
+                    outcome = barman.kickOut(client);
+                }  
+            }
         }
+        
     }
     
     /**
@@ -97,8 +126,8 @@ public class Boss extends Client {
     public void action(ArrayList<Client> clients) {
         double randAction = Math.random();
         // - order a drink
-        if (randAction >= 0.5) { 
-            if (!orderDrink(favoriteDrink)) {
+        if (randAction >= 0.5 && (alcoholLevel < 4 || favoriteDrink.getAlcohol()==0)) { 
+            if (!orderDrink(favoriteDrink) && favoriteDrink2nd.getAlcohol()==0) {
                 orderDrink(favoriteDrink2nd);
             }
         }
@@ -121,6 +150,41 @@ public class Boss extends Client {
             }
         }
         // else do nothing
+    }
+    
+    // Gender ------------
+    /**
+     * Tell of what gender is the client.
+     * @return the string female or male
+     */    
+    @Override
+    public String tellGender() {
+        return "female";
+    }
+    
+    /**
+     * Change the gender of the client.
+     */
+    @Override
+    public void changeGender() {
+        throw new UnsupportedOperationException("Boss cannot change gender.");
+    }
+    
+    /**
+     * Displays all the informations on the boss for the user.
+     * Used in the management class for Information menu
+     */
+    @Override
+    public void displayInformation() {
+        System.out.println("[Boss]  "+name+" "+surname);
+        System.out.println("   "+tellGender());
+        System.out.println("    Wallet balance: "+wallet);
+        System.out.println("    Popularity: "+popularity);
+        System.out.println("    Favorite drinks: "+favoriteDrink.getName()+" and "
+                + favoriteDrink2nd.getName());
+        System.out.println("    Alcohol level: "+alcoholLevel);
+        System.out.println("    Belote level: "+beloteLevel);
+        System.out.println("    Is the boss of "+currentBar.getName()+": ");
     }
     
 }
