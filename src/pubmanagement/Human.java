@@ -62,7 +62,7 @@ public abstract class Human implements InformationDisplayer {
     public Human(Bar bar, String name, String surname, double wallet, int popularity, String shout) {
         this.name = name;
         this.surname = surname;
-        this.wallet = wallet;
+        this.wallet = (double)((int)(wallet*100)/100);
         this.popularity = popularity;
         this.shout = shout;
         this.currentBar = bar;
@@ -93,7 +93,9 @@ public abstract class Human implements InformationDisplayer {
      * @return the amount that was paid
      */
     public double pay(double cost) {
-        this.wallet -= cost;
+        wallet -= cost;
+        System.out.println("    # "+name+" "+surname+" paid: "+cost
+        +" --> Remaining: "+wallet);
         return cost;
     }
     
@@ -118,7 +120,7 @@ public abstract class Human implements InformationDisplayer {
     public void introduce() {
         // add a little variety in the beginning of the introduction
         String[] intro = Human.INTRODUCTIONS.split(",");
-        int randomInt = (int)(Math.random() * (intro.length + 1));
+        int randomInt = (int)(Math.random() * intro.length);
         
         speak(intro[randomInt]+", I'm "+this.name+" "+this.surname, null);
     }

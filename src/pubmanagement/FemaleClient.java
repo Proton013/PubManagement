@@ -5,6 +5,7 @@
  */
 
 package pubmanagement;
+import Exceptions.MaxCapacityReachedException;
 import java.util.ArrayList;
 
 /**
@@ -59,7 +60,10 @@ public class FemaleClient extends Client {
                 this.popularity, this.shout, this.favoriteDrink, 
                 this.favoriteDrink2nd, this.beloteLevel, teeShirt);
         // then replace the obsolete one
-        if (currentBar.removeClient(this)) currentBar.addClient(newThis);
+        if(currentBar.removeClient(this, true)) {
+            try { currentBar.addClient(newThis); }
+            catch (MaxCapacityReachedException e) {}
+        }
     }
     
     // ----- Getters -----

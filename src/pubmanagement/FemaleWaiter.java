@@ -6,6 +6,8 @@
 
 package pubmanagement;
 
+import Exceptions.MaxCapacityReachedException;
+
 /**
  *
  * @author eugenie_dalmas
@@ -61,7 +63,10 @@ public class FemaleWaiter extends Waiter {
         Waiter newThis = new MaleWaiter(this.currentBar, this.name, this.surname,
                     this.wallet, this.popularity, this.shout, getCharm());
         // then replace the obsolete one
-        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
+        if(currentBar.removeWaiter(this, true)) {
+            try { currentBar.addWaiter(newThis); }
+            catch (MaxCapacityReachedException e) {}
+        }
     }
     
     // Employee -----------

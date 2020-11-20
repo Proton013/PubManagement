@@ -5,6 +5,8 @@
  */
 package pubmanagement;
 
+import Exceptions.MaxCapacityReachedException;
+import Exceptions.MinCapacityReachedException;
 import Exceptions.UnsupportedInputException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +19,7 @@ import java.util.Scanner;
  *
  * @author eugenie_dalmas
  */
-public class Management {
+public abstract class Management {
     
     public static final String CMD_MAIN_MENU = "M,Q,N";
     public static final String CMD_M_MENU = "Q,A,E,I,T,R";
@@ -93,7 +95,7 @@ public class Management {
     private static void menu(Bar bar) throws UnsupportedInputException {
         System.out.println("--------------------------------------------------");
         System.out.println(" -> Menu                      [R] Return [Q] Quit ");
-        System.out.println(" [A] Add    [E] Erase    [I] Get Information");
+        System.out.println(" [A] Add    [I] Information   [T] Tournament ");
         System.out.println("--------------------------------------------------");
         String input = scanInput(CMD_M_MENU);
         if (null != input) switch (input) {
@@ -104,7 +106,6 @@ public class Management {
                 }
             }
             case "A" -> add(bar);
-            case "E" -> erase(bar);
             case "I" -> information(bar);
             case "R" -> dialog(bar);
             default -> {
@@ -119,8 +120,8 @@ public class Management {
      */
     private static void information(Bar bar) throws UnsupportedInputException {
         System.out.println("--------------------------------------------------");
-        System.out.println(" -> Information               [R] Return [Q] Quit ");
-        System.out.println(" [C] Client [W] Waiter  [B] Barman [S] Supplier   ");
+        System.out.println(" Menu -> Information          [R] Return [Q] Quit ");
+        System.out.println(" [C] Client [W] Waiter  [B] Barman  [S] Supplier  ");
         System.out.println(" [F] Boss   [P] Pub     [D] Drinks                ");
         System.out.println("--------------------------------------------------");
         String input = scanInput(CMD_I_MENU);
@@ -132,35 +133,68 @@ public class Management {
                 }
             }
             case "C" -> {
+                System.out.println(" -> Client Info     [E] Erase [R] Return  [Q] Quit");
                 bar.displayClients();
                 clientInfo(bar);
             }
             case "W" -> {
+                System.out.println(" -> Waiter info     [E] Erase [R] Return  [Q] Quit");
                 bar.displayWaiters();
                 waiterInfo(bar);
             }
             case "B" -> {
+                System.out.println(" -> Barman Info     [E] Erase [R] Return  [Q] Quit");
                 bar.displayBarmans();
                 barmanInfo(bar);
             }
             case "S" -> {
+                System.out.println(" -> Supplier Info");
+                Bar.getSupplier().introduce();
                 Bar.getSupplier().displayInformation();
                 information(bar);
             }
             case "F" -> {
+                System.out.println(" -> Boss Info");
+                bar.getBoss().introduce();
                 bar.getBoss().displayInformation();
                 information(bar);
             }
             case "P" -> {
-                bar.displayInformation();
-                information(bar);
+                System.out.println(" -> Pub Info       [S] Stocks [R] Return  [Q] Quit");
+                pubInfo(bar);
             }
             case "D" -> {
+                System.out.println(" -> Drinks Info");
                 bar.displayDrinksMenu();
                 information(bar);
             }
             case "R" -> menu(bar);
             default -> information(bar);
+        }
+    }
+    
+    /**
+     * Display the pub inforamtion and the user may choose to display the stocks.
+     * @param bar
+     * @throws UnsupportedInputException 
+     */
+    private static void pubInfo(Bar bar) throws UnsupportedInputException {
+        bar.displayInformation();
+        System.out.println(" -> Pub Info       [S] Stocks [R] Return  [Q] Quit");
+        String pubCMD = "Q,R,S";
+        String input = scanInput(pubCMD);
+        if (null != input) switch (input) {
+            case "Q" -> {
+                if(!quit()) {
+                    System.out.println("You did not quit, choose a command !");
+                    clientInfo(bar);
+                }
+            }
+            case "R" -> information(bar);
+            case "S" -> {
+                bar.displayStock();
+                information(bar);
+            }
         }
     }
     
@@ -171,8 +205,8 @@ public class Management {
      * @throws UnsupportedInputException 
      */
     private static void clientInfo(Bar bar) throws UnsupportedInputException {
-        System.out.println("[R] Return  [Q] Quit");
-        String clientCMD = "Q,R,E,";
+        System.out.println(" -> Client Info     [E] Erase [R] Return  [Q] Quit");
+        String clientCMD = "E,Q,R,";
         for (int i = 0; i<bar.getClients().size(); i++) {
             if (i == bar.getClients().size() - 1) clientCMD += Integer.toString(i);
             else clientCMD += Integer.toString(i)+",";
@@ -186,10 +220,32 @@ public class Management {
                 }
             }
             case "R" -> information(bar);
-            //case "E" ->  clientInfo(bar);
+            case "E" -> eraseClient(bar, clientCMD);
             default ->  {
+                bar.getClients().get(Integer.parseInt(input)).introduce();
                 bar.getClients().get(Integer.parseInt(input)).displayInformation();
                 clientInfo(bar);
+            }
+        }
+    }
+    
+    private static void eraseClient(Bar bar, String cmd) throws UnsupportedInputException {
+        System.out.println("Which client would you like to erase ?");
+        String input = scanInput(cmd.substring(2));
+        if (null != input) switch (input) {
+            case "Q" -> {
+                if(!quit()) {
+                    System.out.println("You did not quit, choose a command !");
+                    clientInfo(bar);
+                }
+            }
+            case "R" -> clientInfo(bar); 
+            default -> {
+                try { 
+                    bar.removeClient(bar.getClients().get(Integer.parseInt(input))); 
+                    clientInfo(bar);
+                }
+                catch (MinCapacityReachedException e) {}
             }
         }
     }
@@ -201,7 +257,7 @@ public class Management {
      * @throws UnsupportedInputException 
      */
     private static void waiterInfo(Bar bar) throws UnsupportedInputException {
-        System.out.println("[R] Return  [Q] Quit");
+        System.out.println(" -> Waiter info     [E] Erase [R] Return  [Q] Quit");
         String waiterCMD = "Q,R,";
         for (int i = 0; i<bar.getWaiters().size(); i++) {
             if (i == bar.getWaiters().size() - 1) waiterCMD += Integer.toString(i);
@@ -216,9 +272,32 @@ public class Management {
                 }
             }
             case "R" -> information(bar);
+            case "E" -> eraseWaiter(bar, waiterCMD);
             default ->  {
+                bar.getWaiters().get(Integer.parseInt(input)).introduce();
                 bar.getWaiters().get(Integer.parseInt(input)).displayInformation();
                 waiterInfo(bar);
+            }
+        }
+    }
+    
+    private static void eraseWaiter(Bar bar, String cmd) throws UnsupportedInputException {
+        System.out.println("Which client would you like to erase ?");
+        String input = scanInput(cmd.substring(2));
+        if (null != input) switch (input) {
+            case "Q" -> {
+                if(!quit()) {
+                    System.out.println("You did not quit, choose a command !");
+                    waiterInfo(bar);
+                }
+            }
+            case "R" -> waiterInfo(bar); 
+            default -> {
+                try { 
+                    bar.removeWaiter(bar.getWaiters().get(Integer.parseInt(input))); 
+                    waiterInfo(bar);
+                }
+                catch (MinCapacityReachedException e) {}
             }
         }
     }
@@ -230,7 +309,7 @@ public class Management {
      * @throws UnsupportedInputException 
      */
     private static void barmanInfo(Bar bar) throws UnsupportedInputException {
-        System.out.println("[R] Return  [Q] Quit");
+        System.out.println(" -> Barman Info     [E] Erase [R] Return  [Q] Quit");
         String barmanCMD = "Q,R,";
         for (int i = 0; i<bar.getBarmans().size(); i++) {
             if (i == bar.getBarmans().size() - 1) barmanCMD += Integer.toString(i);
@@ -245,12 +324,35 @@ public class Management {
                 }
             }
             case "R" -> information(bar);
+            case "E" -> eraseBarman(bar, barmanCMD);
             default ->  {
+                bar.getBarmans().get(Integer.parseInt(input)).introduce();
                 bar.getBarmans().get(Integer.parseInt(input)).displayInformation();
                 barmanInfo(bar);
             }
         }
     } 
+    
+    private static void eraseBarman(Bar bar, String cmd) throws UnsupportedInputException {
+        System.out.println("Which client would you like to erase ?");
+        String input = scanInput(cmd.substring(2));
+        if (null != input) switch (input) {
+            case "Q" -> {
+                if(!quit()) {
+                    System.out.println("You did not quit, choose a command !");
+                    barmanInfo(bar);
+                }
+            }
+            case "R" -> barmanInfo(bar); 
+            default -> {
+                try { 
+                    bar.removeBarman(bar.getBarmans().get(Integer.parseInt(input))); 
+                    barmanInfo(bar);
+                }
+                catch (MinCapacityReachedException e) {}
+            }
+        }
+    }
     
     /**
      * Display the add menu.
@@ -260,7 +362,7 @@ public class Management {
     private static void add(Bar bar) throws UnsupportedInputException {
         System.out.println("--------------------------------------------------");
         System.out.println(" Menu -> Add                  [R] Return [Q] Quit ");
-        System.out.println(" [C] Client [W] Waiter  [B] Barman ");
+        System.out.println(" [C] Client [W] Waiter  [B] Barman  [T] Table ");
         System.out.println("--------------------------------------------------");
         String input = scanInput(CMD_AE_MENU);
         if (null != input) switch (input) {
@@ -280,6 +382,14 @@ public class Management {
                 addBarman(bar);
             }
             case "R" -> menu(bar);
+            case "T" -> {
+                try {
+                    bar.addTable();
+                    System.out.println("One table added");
+                } 
+                catch(MaxCapacityReachedException e) {System.err.println(e.getMessage());}
+                
+            }
             default -> add(bar);
         }
     }
@@ -338,8 +448,11 @@ public class Management {
                         accessories
                     ); 
                 }
-                bar.addClient(newClient);
-                System.out.println("Client "+newClient.getName()+" "+newClient.getSurname()+" created !"); 
+                try {
+                    bar.addClient(newClient);
+                    System.out.println("Client "+newClient.getName()+" "+newClient.getSurname()+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
             case "M" -> {
@@ -356,12 +469,13 @@ public class Management {
                 System.out.println("Belote level : (range 0 to 10)");
                 int beloteLevel = Integer.parseInt(scanInput("0,1,2,3,4,5,6,7,8,9,10")); // un peu moche mais court
                 
+                Client newClient;
                 if (gender.equals("F")) {
                     ArrayList<String> accessories = new ArrayList<>();
                     for (int j = 0; j<(int) (Math.random()*5); j++) {
                         accessories.add(Bar.ACCESSORIES.get((int) (Math.random()*Bar.ACCESSORIES.size())));
                     }
-                    bar.addClient(new FemaleClient(
+                    newClient = new FemaleClient(
                         bar, name, surname,
                         (int) (Math.random() * 200),
                         (int) (Math.random()*10),
@@ -369,10 +483,10 @@ public class Management {
                         Bar.getDrinksMenu().get((int) (Math.random()*Bar.getDrinksMenu().size())),
                         Bar.getDrinksMenu().get((int) (Math.random()*Bar.getDrinksMenu().size())),
                         beloteLevel, accessories
-                    ));   
+                    );   
                 }
                 else {
-                    bar.addClient(new MaleClient(
+                    newClient = new MaleClient(
                         bar, name, surname,
                         (int) (Math.random() * 200),
                         (int) (Math.random()*10),
@@ -381,9 +495,13 @@ public class Management {
                         Bar.getDrinksMenu().get((int) (Math.random()*Bar.getDrinksMenu().size())),
                         beloteLevel,
                         Bar.COLORS.get((int) (Math.random()*Bar.COLORS.size()))+" tee-shirt"
-                    ));
+                    );
                 }
-                System.out.println("Client "+name+" "+surname+" created !");
+                try {
+                    bar.addClient(newClient);
+                    System.out.println("Client "+name+" "+surname+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
         }
@@ -433,8 +551,11 @@ public class Management {
                         (int) (Math.random()*10)
                     ); 
                 }
-                bar.addWaiter(newWaiter);
-                System.out.println("Waiter "+newWaiter.getName()+" "+newWaiter.getSurname()+" created !"); 
+                try {
+                    bar.addWaiter(newWaiter);
+                    System.out.println("Waiter "+newWaiter.getName()+" "+newWaiter.getSurname()+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
             case "M" -> {
@@ -451,25 +572,30 @@ public class Management {
                 System.out.println("Charm/Biceps level : (range 0 to 10)");
                 int attribute = Integer.parseInt(scanInput("0,1,2,3,4,5,6,7,8,9,10")); // un peu moche mais court
                 
+                Waiter newWaiter;
                 if (gender.equals("F")) {
-                    bar.addWaiter(new FemaleWaiter(
+                    newWaiter = new FemaleWaiter(
                         bar, name, surname,
                         (int) (Math.random() * 200),
                         (int) (Math.random()*10),
                         Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
                         attribute
-                    ));   
+                    );   
                 }
                 else {
-                    bar.addWaiter(new MaleWaiter(
+                    newWaiter = new MaleWaiter(
                         bar, name, surname,
                         (int) (Math.random() * 200),
                         (int) (Math.random()*10),
                         Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size())),
                         attribute
-                    ));   
+                    );   
                 }
-                System.out.println("Waiter "+name+" "+surname+" created !");
+                try {
+                    bar.addWaiter(newWaiter);
+                    System.out.println("Waiter "+name+" "+surname+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
         }
@@ -504,9 +630,11 @@ public class Management {
                     (int) (Math.random()*10),
                     Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size()))
                 );
-                
-                bar.addBarman(newBarman);
-                System.out.println("Barman "+newBarman.getName()+" "+newBarman.getSurname()+" created !"); 
+                try {
+                    bar.addBarman(newBarman);
+                    System.out.println("Barman "+newBarman.getName()+" "+newBarman.getSurname()+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
             case "M" -> {
@@ -525,20 +653,14 @@ public class Management {
                     (int) (Math.random()*10),
                     Bar.SHOUTS.get((int) (Math.random()*Bar.SHOUTS.size()))
                 );
-                
-                System.out.println("Barman "+name+" "+surname+" created !");
+                try {
+                    bar.addBarman(newBarman);
+                    System.out.println("Barman "+name+" "+surname+" created !"); 
+                }
+                catch (MaxCapacityReachedException e) { System.out.println(e.getMessage()); }
                 add(bar);
             }
         }
-    }
-    
-    private static void erase(Bar bar) throws UnsupportedInputException {
-        System.out.println("--------------------------------------------------");
-        System.out.println(" -> Menu -> Erase             [R] Return [Q] Quit ");
-        System.out.println(" [C] Client [W] Waiter  [B] Barman ");
-        System.out.println("--------------------------------------------------");
-        String input = scanInput(CMD_AE_MENU);
-        
     }
     
     /**

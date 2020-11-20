@@ -6,6 +6,7 @@
 
 package pubmanagement;
 
+import Exceptions.MaxCapacityReachedException;
 import java.util.ArrayList;
 
 /**
@@ -63,7 +64,10 @@ public class MaleWaiter extends Waiter {
         Waiter newThis = new FemaleWaiter(this.currentBar, this.name, this.surname,
                 this.wallet, this.popularity, this.shout, getBiceps());
         // then replace the obsolete one
-        if(currentBar.removeEmployee(this)) currentBar.addWaiter(newThis);
+        if(currentBar.removeWaiter(this, true)) {
+            try { currentBar.addWaiter(newThis); }
+            catch (MaxCapacityReachedException e) {}
+        }
     }
     
     // Employee ----------------

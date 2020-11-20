@@ -87,6 +87,7 @@ public class Supplier extends Human {
      * Displays all the informations on the barman for the user.
      * Used in the management class for Information menu
      */
+    @Override
     public void displayInformation() {
         System.out.println("[Supplier]  "+name+" "+surname);
         System.out.println("    Wallet balance: "+wallet);

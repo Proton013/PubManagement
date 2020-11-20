@@ -8,6 +8,7 @@ package pubmanagement;
 
 import Exceptions.DoesNotExistException;
 import Exceptions.MaxCapacityReachedException;
+import Exceptions.MinCapacityReachedException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -50,7 +51,7 @@ public class Bar implements InformationDisplayer {
      * Fixed limits.
      */
     public static final int LOW_QUANTITY_LIMIT = 3;
-    public static final int HIGH_QUANTITY_LIMIT = 20;
+    public static final int HIGH_QUANTITY_LIMIT = 5;
     public static final double TILL_LIMIT = 250;
     public static final int TABLES_LIMIT = 8;
     public static final int EMPLOYEE_LIMIT = 10;
@@ -109,7 +110,7 @@ public class Bar implements InformationDisplayer {
     public Bar(String name) {
         this.name = name;
         this.till = (int) (Math.random()*200);
-        
+        // 
         this.init();
     }
     
@@ -118,33 +119,79 @@ public class Bar implements InformationDisplayer {
     /**
      * Add a new waiter to the bar.
      * @param waiter : new instance
+     * @throws Exceptions.MaxCapacityReachedException
      */
-    public void addWaiter(Waiter waiter) {
+    public void addWaiter(Waiter waiter) throws MaxCapacityReachedException {
+        if (employees.size() == EMPLOYEE_LIMIT) {
+            throw new MaxCapacityReachedException("Max number of employees already reached, "
+            + "cannot add more.");
+        }
         this.employees.add(waiter);
     }
     
     /**
      * Add a new barman to the bar.
      * @param barman 
+     * @throws Exceptions.MaxCapacityReachedException 
      */
-    public void addBarman(Barman barman) {
+    public void addBarman(Barman barman) throws MaxCapacityReachedException {
+        if (employees.size() == EMPLOYEE_LIMIT) {
+            throw new MaxCapacityReachedException("Max number of employees already reached, "
+            + "cannot add more.");
+        }
         this.employees.add(barman);
     }
     
     /**
-     * Remove a client from the clients list.
+     * Remove a barman from the employees list.
      * @param employee
      * @return 
+     * @throws Exceptions.MinCapacityReachedException 
      */
-    public Boolean removeEmployee(Employee employee) {
+    public Boolean removeBarman(Employee employee) throws MinCapacityReachedException {
+        if (getBarmans().size() == 1) {
+            throw new MinCapacityReachedException("Min number of barmans already reached, "
+            + "cannot remove more.");
+        }
         return employees.remove(employee);
+    }
+    
+    /**
+     * Remove a waiter from the employees list.
+     * @param employee
+     * @return 
+     * @throws Exceptions.MinCapacityReachedException 
+     */
+    public Boolean removeWaiter(Employee employee) throws MinCapacityReachedException {
+        if (getWaiters().size() == 1) {
+            throw new MinCapacityReachedException("Min number of waiters already reached, "
+            + "cannot remove more.");
+        }
+        return employees.remove(employee);
+    }
+    
+    /**
+     * Remove a waiter from the employees list.
+     * For changeGender use
+     * @param employee to be removed
+     * @param changeGender Boolean added to specify the use of this version
+     * @return 
+     */
+    public Boolean removeWaiter(Employee employee, Boolean changeGender) {
+        if (changeGender) return employees.remove(employee);
+        else return false;
     }
     
     /**
      * Add a new client to the bar.
      * @param client 
+     * @throws Exceptions.MaxCapacityReachedException 
      */
-    public void addClient(Client client) {
+    public void addClient(Client client) throws MaxCapacityReachedException {
+        if (clients.size() == TABLES_LIMIT*4) {
+            throw new MaxCapacityReachedException("Max number of clients already reached, "
+            + "cannot add more.");
+        }
         this.clients.add(client);
     }
     
@@ -152,21 +199,54 @@ public class Bar implements InformationDisplayer {
      * Remove a client from the clients list.
      * @param client
      * @return 
+     * @throws Exceptions.MinCapacityReachedException 
      */
-    public Boolean removeClient(Client client) {
+    public Boolean removeClient(Client client) throws MinCapacityReachedException {
+        if (clients.size() == 1) {
+            throw new MinCapacityReachedException("Min number of clients already reached, "
+            + "cannot remove more.");
+        }
         return clients.remove(client);
+    }
+    
+    /**
+     * Remove a client from the clients list.
+     * For changeGender use
+     * @param client to be removed
+     * @param changeGender Boolean added to specify the use of this version
+     * @return 
+     */
+    public Boolean removeClient(Client client, Boolean changeGender) {
+        if (changeGender) return clients.remove(client);
+        else return false;
     }
     
     /**
      * Add new tables to the pub.
      * @throws Exceptions.MaxCapacityReachedException
      */
-    public void addTables() throws MaxCapacityReachedException {
+    public void addTable() throws MaxCapacityReachedException {
         if (tables.size() == TABLES_LIMIT) {
             throw new MaxCapacityReachedException("Max number of tables already reached, "
             + "cannot add more.");
         }
         this.tables.add(new Client[4]);
+    }
+    
+    /**
+     * Remove the last table of the ArrayList of tables by making of clients to 
+     * the removed table leave the pub.
+     * @return
+     * @throws MinCapacityReachedException 
+     */
+    public Boolean removeTable() throws MinCapacityReachedException {
+        if (tables.size() == 1) {
+            throw new MinCapacityReachedException("Min number of tables already reached, "
+            + "cannot remove more.");
+        }
+        Client[] lastTable = tables.get(tables.size() - 1);
+        for (int i = 0; i<lastTable.length; i++) lastTable[i].leavePub();
+        return tables.remove(lastTable);
     }
     
     // ----- Displays (user) -----
@@ -186,7 +266,7 @@ public class Bar implements InformationDisplayer {
     public void displayStock() {
         System.out.println("*** Stocks ***");
         this.stocks.keySet().forEach(e -> {
-            System.out.println(" ." + e + " : " + this.stocks.get(e));
+            System.out.println(" ." + e + " :   "+ this.stocks.get(e));
         });
         System.out.println("* * *    * * *");
     }
@@ -208,21 +288,18 @@ public class Bar implements InformationDisplayer {
     }
     
     public void displayClients() {
-        System.out.println("Clients :");
         for (int i = 0; i<clients.size(); i++) {
             System.out.println("["+i+"] "+clients.get(i).getName()+" "+clients.get(i).getSurname());
         }
     }
     
     public void displayWaiters() {
-        System.out.println("Waiters :");
         for (int i = 0; i<getWaiters().size(); i++) {
             System.out.println("["+i+"] "+getWaiters().get(i).getName()+" "+getWaiters().get(i).getSurname());
         }
     }
     
     public void displayBarmans() {
-        System.out.println("Barmans :");
         for (int i = 0; i<getBarmans().size(); i++) {
             System.out.println("["+i+"] "+getBarmans().get(i).getName()+" "+getBarmans().get(i).getSurname());
         }

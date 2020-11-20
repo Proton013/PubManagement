@@ -132,16 +132,6 @@ abstract public class Client extends Human implements Gender {
     }
     
     /**
-     * Pay the cost for any payment, here a drink.
-     * @param cost
-     * @return the amount that was paid
-     */
-    @Override
-    public double pay(double cost) {
-        return super.pay(cost);
-    }
-    
-    /**
      * Buy a drink for another fellow client and maybe change its popularity.
      * @param to the client that receive the drink
      */
@@ -383,12 +373,8 @@ abstract public class Client extends Human implements Gender {
             else if (randAction >= 0.4 && randAction<0.5) {
                 double randHuman = Math.random();
                 if (randHuman > 0.3 && clients.size()>0){ // -- to client
-                    try {
-                        offerDrink(clients.get((int) (Math.random()*clients.size())));
-                    }
-                    catch (SelfInteractionException e) {
-                        System.out.println(e.getMessage());
-                    }
+                    try { offerDrink(clients.get((int) (Math.random()*clients.size()))); }
+                    catch (SelfInteractionException e) {}
                 }
                 else { // -- to waiter
                     // probability of offer differs on the waiters charm/bicep

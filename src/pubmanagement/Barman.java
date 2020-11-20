@@ -9,8 +9,6 @@ package pubmanagement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-//import java.util.LinkedList;
-//import java.time.LocalTime;
 
 /**
  *
@@ -113,18 +111,17 @@ public class Barman extends Human implements Employee {
     
     /**
      * Gives the overflow of money from the till depending on the limit hardcoded.
-     * @param boss to give to ( may be supressed and directly getBoss() )
      */
-    public void giveOverflow(Boss boss) {
+    public void giveOverflow() {
         // calculate overflow
-        double overflow = currentBar.getTillBalance() - Bar.TILL_LIMIT;
+        double overflow = currentBar.getTillBalance() - Bar.TILL_LIMIT + 100;
         // remove overflow from till
         currentBar.setTillBalance(currentBar.getTillBalance() - overflow);
         System.out.println("    # Till - "+overflow+" -> "+currentBar.getTillBalance());
         // give to boss
         speak("Boss, that's the overflow", null);
-        boss.takeOverflow(overflow);
-        boss.speak("Thanks", null);
+        currentBar.getBoss().takeOverflow(overflow);
+        currentBar.getBoss().speak("Thanks", null);
     }
     
     /**
@@ -141,6 +138,7 @@ public class Barman extends Human implements Employee {
         System.out.println("    # Till + "+cost+" -> "+currentBar.getTillBalance());
         speak("Here is your receipt", null);
         client.speak("Thank you", null);
+        if (currentBar.getTillBalance() >= Bar.TILL_LIMIT) giveOverflow();
     }
     
     /**
@@ -152,8 +150,9 @@ public class Barman extends Human implements Employee {
     public void giveChange(double cost, double give, Client client) {
         double change = give - cost;
         client.wallet += change; // can access whitout getWallet => pb
-        System.out.println("    # "+client.name+" "+client.surname+" paid: "+ cost 
-                +" -> Remaining: " + wallet);
+        change = (double) ((int)(change*100))/100; // set precision on 2 number after the coma for print
+        System.out.println("    # "+client.name+" "+client.surname+" change: "+ change 
+                +" -> new balance: " + (double) ((int)(wallet*100))/100);
     }
     
     /**
@@ -163,10 +162,11 @@ public class Barman extends Human implements Employee {
      */
     public void orderSupply(Supplier supplier) {        
         Map<String, Integer> order = toOrder();
+        speak("thoses are the drinks that need a refill", supplier);
         supplier.deliver(order, this); // stock refilled
-        System.out.println("Right on time !");
-        System.out.println("Here's your payment");
-        supplier.getPaid(this, ((double) order.get("total_cost"))/100);
+        speak("Right on time !", null);
+        speak("here's your payment", supplier);
+        supplier.getPaid(this, ((double) order.get("total_cost*100"))/100);
     }
     
     /**
@@ -202,7 +202,7 @@ public class Barman extends Human implements Employee {
         if (oldValue == 0) {
             speak("There's no more " + drink.getName() + "... We'll have to order soon", null);
             currentBar.setRunOutDrinks(currentBar.getRunOutDrinks() + 1);
-            if (currentBar.getRunOutDrinks() == 3) orderSupply(Bar.getSupplier());
+            if (currentBar.getRunOutDrinks() == 3 ) orderSupply(Bar.getSupplier());
             return false;
         }
         else {
@@ -227,6 +227,8 @@ public class Barman extends Human implements Employee {
                 }
             }
         }
+        currentBar.setRunOutDrinks(0);
+        System.out.println("-- Stocks have been refilled --");
     }
     
     // Employee ----------
