@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Human that manage the stocks and the till of the bar.
  * @author eugenie_dalmas
  */
 public class Barman extends Human implements Employee {
@@ -31,8 +31,8 @@ public class Barman extends Human implements Employee {
     
     /**
      * Announce the speaker for the user and write the wanted message.
-     * @param message to be said
-     * @param to ; is null when speaking to no one in particular
+     * @param message to be printed
+     * @param to is null when speaking to no one in particular
      */
     @Override
     public void speak(String message, Human to) {
@@ -127,7 +127,7 @@ public class Barman extends Human implements Employee {
     /**
      * Take the money from a client for his drink.
      * @param cost to pay
-     * @param client 
+     * @param client that pays
      */
     public void aksToPay(double cost, Client client) {
         // pay
@@ -142,10 +142,10 @@ public class Barman extends Human implements Employee {
     }
     
     /**
-     * Give the change;
-     * @param cost
-     * @param give
-     * @param client 
+     * Give the change.
+     * @param cost exact amount to be paid
+     * @param give what the client actually gave
+     * @param client that pays
      */
     public void giveChange(double cost, double give, Client client) {
         double change = give - cost;
@@ -236,7 +236,7 @@ public class Barman extends Human implements Employee {
      * Serve the drink to the client.
      * @param drink
      * @param to 
-     * @return a Boolean
+     * @return true if the action was successful
      */
     @Override
     public Boolean serve(Drink drink, Client to) {
@@ -258,7 +258,7 @@ public class Barman extends Human implements Employee {
      * Try to kick a client out of the pub depending on the employee's ability 
      * and the client's resistance.
      * @param client to kick out
-     * @return a Boolean for success/failure
+     * @return true if the action was a success
      */
     @Override
     public Boolean kickOut(Client client) {
@@ -271,7 +271,8 @@ public class Barman extends Human implements Employee {
     /**
      * Try to stop a client from drinking more.
      * @param client to say stop to
-     * @return a Boolean for success/failure
+     * @return true if the action was a success
+     * 
      */
     @Override
     public Boolean sayStop(Client client) {

@@ -10,7 +10,7 @@ import Exceptions.SelfInteractionException;
 import java.util.ArrayList;
 
 /**
- *
+ * Entity that interact with the bar.
  * @author eugenie_dalmas
  */
 public abstract class Human implements InformationDisplayer {
@@ -18,8 +18,7 @@ public abstract class Human implements InformationDisplayer {
     /**
      * Possible introductions seperated by a coma.
      */
-    public static final String INTRODUCTIONS 
-            = "Hi,Hello,Let me introduce myself,Oh hi,Hi mate,Well hi";
+    public static final String INTRODUCTIONS = "Hi,Hello,Let me introduce myself,Oh hi,Hi mate,Well hi";
     
     /**
      * The name of the human.
@@ -46,16 +45,13 @@ public abstract class Human implements InformationDisplayer {
      * Instance of the bar that the human is currently assigned to / is in.
      */
     protected Bar currentBar;
-    
-    // for time management
-    //protected LocalTime dateLastAction = LocalTime.now();
    
     /**
      * Constructor.
      * @param bar
      * @param name
      * @param surname
-     * @param wallet starting balance;
+     * @param wallet starting balance
      * @param popularity level
      * @param shout 
      */
@@ -140,10 +136,19 @@ public abstract class Human implements InformationDisplayer {
     @Override
     public abstract void displayInformation();
     
+    // ----- Setters -----
+    /**
+     * Set the wallet balance. 
+     * @param balance to be setted
+     */
+    public void setWalletBalance(double balance) {
+        wallet = balance;
+    }
+    
     // ----- Getters -----
     /**
      * Get the name.
-     * @return a String
+     * @return the string name
      */
     public String getName() {
         return this.name;
@@ -151,7 +156,7 @@ public abstract class Human implements InformationDisplayer {
     
     /**
      * Get the surname.
-     * @return a String
+     * @return the string surname
      */
     public String getSurname() {
         return this.surname;
@@ -159,7 +164,7 @@ public abstract class Human implements InformationDisplayer {
     
     /**
      * Get the wallet balance.
-     * @return a double
+     * @return the double balance
      */
     public double getWalletBalance() {
         return this.wallet;
@@ -167,7 +172,7 @@ public abstract class Human implements InformationDisplayer {
     
     /**
      * Get the popularity level (max 10)
-     * @return an integer
+     * @return the level as an integer
      */
     public int getPopularity() {
         return this.popularity;
@@ -175,7 +180,7 @@ public abstract class Human implements InformationDisplayer {
     
     /**
      * Get the shout.
-     * @return a String
+     * @return the string shout
      */
     public String getShout() {
         return this.shout;

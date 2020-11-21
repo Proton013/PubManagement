@@ -6,6 +6,7 @@
 
 package pubmanagement;
 
+import Belote.Team;
 import Exceptions.DoesNotExistException;
 import Exceptions.MaxCapacityReachedException;
 import Exceptions.MinCapacityReachedException;
@@ -20,12 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Object of the management where all human actions takes place.
  * @author eugenie_dalmas
  */
 public class Bar implements InformationDisplayer {
     
-    /**
+    /*
      * Path names of the initiation files 
      */
     public static final String FEMALE_NAMES_PATH = "src/resources/female_names.txt";
@@ -36,7 +37,7 @@ public class Bar implements InformationDisplayer {
     public static final String ACCESSORIES_PATH = "src/resources/accessories.txt";
     public static final String COLORS_PATH = "src/resources/colors.txt";
     
-    /**
+    /*
      * Stored data that is loaded at the initiation.
      */
     public static ArrayList<String> DRINKS;
@@ -47,7 +48,7 @@ public class Bar implements InformationDisplayer {
     public static ArrayList<String> ACCESSORIES;
     public static ArrayList<String> COLORS;
     
-    /**
+    /*
      * Fixed limits.
      */
     public static final int LOW_QUANTITY_LIMIT = 3;
@@ -83,7 +84,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Space that may be used by clients.
      * (Says if the client is in or out this bar)
-     * (4 place per table at most, null if unused space)
+     * (4 places per table at most, null if unused space)
      */
     private ArrayList<Client[]> tables = new ArrayList<>();
     /**
@@ -102,6 +103,10 @@ public class Bar implements InformationDisplayer {
      * Number of drinks that ran out in stockfor this bar.
      */
     private int runOutDrinks = 0;
+    /**
+     * Record the number of belote tournaments that have been runned for this bar.
+     */
+    private int tournamentCount = 0;
     
     /**
      * Constructor
@@ -110,7 +115,6 @@ public class Bar implements InformationDisplayer {
     public Bar(String name) {
         this.name = name;
         this.till = (int) (Math.random()*200);
-        // 
         this.init();
     }
     
@@ -145,7 +149,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Remove a barman from the employees list.
      * @param employee
-     * @return 
+     * @return true if the barman is successfully removed
      * @throws Exceptions.MinCapacityReachedException 
      */
     public Boolean removeBarman(Employee employee) throws MinCapacityReachedException {
@@ -159,7 +163,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Remove a waiter from the employees list.
      * @param employee
-     * @return 
+     * @return true if a waiter is successfully removed
      * @throws Exceptions.MinCapacityReachedException 
      */
     public Boolean removeWaiter(Employee employee) throws MinCapacityReachedException {
@@ -175,7 +179,7 @@ public class Bar implements InformationDisplayer {
      * For changeGender use
      * @param employee to be removed
      * @param changeGender Boolean added to specify the use of this version
-     * @return 
+     * @return true if the waiter is successfully removed
      */
     public Boolean removeWaiter(Employee employee, Boolean changeGender) {
         if (changeGender) return employees.remove(employee);
@@ -198,7 +202,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Remove a client from the clients list.
      * @param client
-     * @return 
+     * @return true if the client is successufully removed
      * @throws Exceptions.MinCapacityReachedException 
      */
     public Boolean removeClient(Client client) throws MinCapacityReachedException {
@@ -214,7 +218,7 @@ public class Bar implements InformationDisplayer {
      * For changeGender use
      * @param client to be removed
      * @param changeGender Boolean added to specify the use of this version
-     * @return 
+     * @return true of the client is successfully removed
      */
     public Boolean removeClient(Client client, Boolean changeGender) {
         if (changeGender) return clients.remove(client);
@@ -245,7 +249,9 @@ public class Bar implements InformationDisplayer {
             + "cannot remove more.");
         }
         Client[] lastTable = tables.get(tables.size() - 1);
-        for (int i = 0; i<lastTable.length; i++) lastTable[i].leavePub();
+        for (int i = 0; i<lastTable.length; i++) {
+            if (lastTable[i] != null) lastTable[i].leavePub();
+        }
         return tables.remove(lastTable);
     }
     
@@ -287,18 +293,27 @@ public class Bar implements InformationDisplayer {
         System.out.println("    Number of tables: "+getTables().size() +" / "+ TABLES_LIMIT);
     }
     
+    /**
+     * Display the list of clients with numbers as id.
+     */
     public void displayClients() {
         for (int i = 0; i<clients.size(); i++) {
             System.out.println("["+i+"] "+clients.get(i).getName()+" "+clients.get(i).getSurname());
         }
     }
     
+    /**
+     * Display the list of waiters with numbers as id.
+     */
     public void displayWaiters() {
         for (int i = 0; i<getWaiters().size(); i++) {
             System.out.println("["+i+"] "+getWaiters().get(i).getName()+" "+getWaiters().get(i).getSurname());
         }
     }
     
+    /**
+     * Display the list of barmans with numbers as id.
+     */
     public void displayBarmans() {
         for (int i = 0; i<getBarmans().size(); i++) {
             System.out.println("["+i+"] "+getBarmans().get(i).getName()+" "+getBarmans().get(i).getSurname());
@@ -316,7 +331,7 @@ public class Bar implements InformationDisplayer {
             Bar.loadAttributes();
         } 
         catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
         
         // initiating tables: 4
@@ -435,7 +450,7 @@ public class Bar implements InformationDisplayer {
      * @param pathName
      * @param separator
      * @return an ArrayList of each data parse to String
-     * @throws IOException 
+     * @throws IOException from file opening
      */
     public static ArrayList<String> loadData(String pathName, String separator) throws IOException {
         ArrayList<String> data;    // stored final data
@@ -468,7 +483,7 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Load all needed resources for bar initiation and auto instanciations.
-     * @throws IOException 
+     * @throws IOException from file opening
      */
     public static void loadAttributes() throws IOException {
         // Drinks 
@@ -480,13 +495,15 @@ public class Bar implements InformationDisplayer {
         Bar.SHOUTS = Bar.loadData(SHOUT_PATH, ",");
         Bar.ACCESSORIES = Bar.loadData(ACCESSORIES_PATH, ",");
         Bar.COLORS = Bar.loadData(COLORS_PATH, ",");
+        // Teams
+        Team.NAMES = Bar.loadData(Team.TEAM_NAMES_PATH, ",");
     }
     
     
     // ----- Setters -----
     /**
      * Set the till to its new balance.
-     * @param NewBalance 
+     * @param NewBalance
      */
     public void setTillBalance(double NewBalance) {
         this.till = NewBalance;
@@ -500,18 +517,26 @@ public class Bar implements InformationDisplayer {
         this.runOutDrinks = number;
     }
     
+    /**
+     * Set the tournament count.
+     * @param newCount integer to set
+     */
+    public void serTournamentCount(int newCount) {
+        this.tournamentCount = newCount;
+    }
+    
     // ----- Getters -----    
     /**
-     * Get the name of this bar.
-     * @return 
+     * Get the name.
+     * @return the string name of the bar
      */
     public String getName() {
         return this.name;
     }
     
     /**
-     * Get the till balance if this bar.
-     * @return 
+     * Get the till balance.
+     * @return the double balance of the bar
      */
     public double getTillBalance() {
         return this.till;
@@ -519,7 +544,7 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Get the stocks (names, quantities) of the bar.
-     * @return 
+     * @return the mapping stock of all drink
      */
     public Map<String, Integer> getStocks() {
         return this.stocks;
@@ -544,15 +569,15 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Get the list of all the potential clients.
-     * @return 
+     * @return all clients that may enter in the bar
      */
     public ArrayList<Client> getClients() {
         return this.clients;
     }
     
     /**
-     * Get the tables of the bar.
-     * @return 
+     * Get the tables.
+     * @return all table arrays of the bar
      */
     public ArrayList<Client[]> getTables() {
         return this.tables;
@@ -574,8 +599,8 @@ public class Bar implements InformationDisplayer {
     }
     
     /**
-     * Get the list of employees of this bar.
-     * @return 
+     * Get the employees.
+     * @return all employees of the bar
      */
     public ArrayList<Employee> getEmployees() {
         return this.employees;
@@ -583,7 +608,7 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Get the waiters.
-     * @return 
+     * @return all waiters of the bar
      */
     public ArrayList<Waiter> getWaiters() {
         ArrayList<Waiter> waiters = new ArrayList<>();
@@ -595,7 +620,7 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Get the barmans.
-     * @return 
+     * @return all barman of the bar
      */
     public ArrayList<Barman> getBarmans() {
         ArrayList<Barman> barmans = new ArrayList<>();
@@ -606,20 +631,24 @@ public class Bar implements InformationDisplayer {
     }
     
     /**
-     * Get the boss of the bar.
-     * @return 
+     * Get the boss.
+     * @return the boss of the bar
      */
     public Boss getBoss() {
         return this.boss;
     }
     
+    /**
+     * Get the supplier.
+     * @return the supplier 
+     */
     public static Supplier getSupplier() {
         return supplier;
     }
     
     /**
      * Get the drink menu of all bars.
-     * @return 
+     * @return the list of all drink objects of the bar
      */
     public static ArrayList<Drink> getDrinksMenu() {
         return drinksMenu;
@@ -628,7 +657,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Get the drink Object from its name.
      * @param name
-     * @return the Drink
+     * @return the drink 
      * @throws DoesNotExistException if the name is not one of the existant drinks.
      */
     public static Drink getDrink(String name) throws DoesNotExistException {
@@ -644,5 +673,13 @@ public class Bar implements InformationDisplayer {
             if (drinksMenu.get(i).getName().equals(name)) return drinksMenu.get(i);
         }
         return null; // if not found but should not append
+    }
+    
+    /**
+     * Get the tournament count.
+     * @return the number of runned tournaments
+     */
+    public int getTournamentCount() {
+        return this.tournamentCount;
     }
 }
