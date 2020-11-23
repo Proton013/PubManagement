@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Exceptions;
+package exceptions;
 
 /**
  * Exception to be thrown if a parameter in a method is not existant.

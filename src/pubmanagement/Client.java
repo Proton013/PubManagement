@@ -6,7 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.SelfInteractionException;
+import exceptions.SelfInteractionException;
 import java.util.ArrayList;
 
 /**
@@ -36,8 +36,7 @@ abstract public class Client extends Human implements Gender {
     /**
      * The belote level of the client.
      */
-    protected final int beloteLevel;
-    // private final double drinkingSpeed; = random ?
+    protected int beloteLevel;
     
     /**
      * The cumulatited bill for unpaid drinks.
@@ -111,7 +110,7 @@ abstract public class Client extends Human implements Gender {
         else System.out.println(message);
         // not usually appreciated
         double rand = Math.random();
-        if (rand <= 0.03) this.popularity -= 1;
+        if (rand <= 0.03 && this.popularity > 0) this.popularity -= 1;
     }
     
     /**

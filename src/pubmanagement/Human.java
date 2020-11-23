@@ -6,7 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.SelfInteractionException;
+import exceptions.SelfInteractionException;
 import java.util.ArrayList;
 
 /**
@@ -143,6 +143,23 @@ public abstract class Human implements InformationDisplayer {
      */
     public void setWalletBalance(double balance) {
         wallet = balance;
+    }
+    
+    /**
+     * Set the popularity
+     * @param level to be setted
+     */
+    public void setPopularity(int level) {
+        this.popularity = level;
+    }
+    
+    /**
+     * Set the user for a belote game only.
+     */
+    public void setUser() {
+        this.name = "user";
+        this.surname = "";
+        
     }
     
     // ----- Getters -----

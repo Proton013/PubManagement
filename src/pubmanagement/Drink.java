@@ -53,7 +53,7 @@ public class Drink {
     }
     /**
      * Get the alcohol level.
-     * @return 
+     * @return the level of alcohol
      */
     public int getAlcohol() {
         return this.alcohol;

@@ -6,7 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.SelfInteractionException;
+import exceptions.SelfInteractionException;
 import java.util.ArrayList;
 
 /**
@@ -57,7 +57,10 @@ public class Boss extends Client {
      */
     public void orderStop(Client client) {
         Boolean outcome = false;
-        if (client == this) System.out.println("Wow I should slow down a bit...");
+        if (client == this)  {
+            System.out.println("Wow I should slow down a bit...");
+            alcoholLevel -= 3;
+        }
         else {
             speak("Seems like "+client.getName()+" needs to slow down a little...", null);
             while (!outcome) {
@@ -86,7 +89,10 @@ public class Boss extends Client {
      */
     public void orderKickOut(Client client) {
         Boolean outcome = false;
-        if (client == this) System.out.println("Wow I'll soon need cool down outside a bit...");
+        if (client == this) {
+            System.out.println("Wow I'll soon need cool down outside a bit...");
+            alcoholLevel -= 3;
+        }
         else {
             speak("Seems like "+client.getName()+" should cool down outside...", null);
             while (!outcome) {

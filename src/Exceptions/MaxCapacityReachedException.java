@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Exceptions;
+package exceptions;
 
 /**
  * Exception to be thrown if try to add more to a container (list or so) that

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Exceptions;
+package exceptions;
 
 /**
  * Exception that is thrown when a method used by an instance has itself in his

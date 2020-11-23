@@ -6,8 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.MaxCapacityReachedException;
-import java.util.ArrayList;
+import exceptions.MaxCapacityReachedException;
 
 /**
  *
@@ -41,7 +40,6 @@ public class MaleWaiter extends Waiter {
      */
     @Override
     public void speak(String message, Human to) {
-        //System.out.println();
         System.out.print("< Waiter ");
         super.speak(message, to);
     }
@@ -107,6 +105,15 @@ public class MaleWaiter extends Waiter {
             client.speak("Noo ! I want another drink !", null);
             return false;
         }
+    }
+    
+    /**
+     * Displays all the informations on the client for the user.
+     */
+    @Override
+    public void displayInformation() {
+        super.displayInformation();
+        System.out.println("Biceps : "+ biceps);
     }
     
     // ----- Getters -----

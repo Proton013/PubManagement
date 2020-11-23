@@ -6,7 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.MaxCapacityReachedException;
+import exceptions.MaxCapacityReachedException;
 
 /**
  *
@@ -40,7 +40,6 @@ public class FemaleWaiter extends Waiter {
      */
     @Override
     public void speak(String message, Human to) {
-        //System.out.println();
         System.out.print("< Waitress ");
         super.speak(message, to);
     }
@@ -81,7 +80,6 @@ public class FemaleWaiter extends Waiter {
         super.kickOut(client);
         if (this.charm > client.getPopularity()) {
             client.speak("Alright, alright, I'll leave...", null);
-            client.setRedFlag(true);
             return true;
         }
         else {
@@ -100,12 +98,22 @@ public class FemaleWaiter extends Waiter {
         super.sayStop(client);
         if (this.charm > client.getPopularity()) {
             client.speak("Alright, alright, I'll stop...", null);
+            client.setRedFlag(true);
             return true;
         }
         else {
             client.speak("Noo ! I want another drink !", null);
             return false;
         }
+    }
+    
+    /**
+     * Displays all the informations on the client for the user.
+     */
+    @Override
+    public void displayInformation() {
+        super.displayInformation();
+        System.out.println("Charm : "+ charm);
     }
     
     // ----- Getters -----

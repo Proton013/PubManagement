@@ -5,7 +5,8 @@
  */
 
 package pubmanagement;
-import Exceptions.MaxCapacityReachedException;
+
+import exceptions.MaxCapacityReachedException;
 import java.util.ArrayList;
 
 /**
@@ -64,6 +65,19 @@ public class FemaleClient extends Client {
             try { currentBar.addClient(newThis); }
             catch (MaxCapacityReachedException e) {}
         }
+    }
+    
+    /**
+     * Displays all the informations on the client for the user.
+     */
+    @Override
+    public void displayInformation() {
+        super.displayInformation();
+        System.out.print("Accessories : ");
+        accessories.forEach(acc -> {
+            System.out.print(acc+ " ");
+        });
+        System.out.println();
     }
     
     // ----- Getters -----

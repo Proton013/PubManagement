@@ -6,10 +6,10 @@
 
 package pubmanagement;
 
-import Belote.Team;
-import Exceptions.DoesNotExistException;
-import Exceptions.MaxCapacityReachedException;
-import Exceptions.MinCapacityReachedException;
+import belote.Team;
+import exceptions.DoesNotExistException;
+import exceptions.MaxCapacityReachedException;
+import exceptions.MinCapacityReachedException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -123,7 +123,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Add a new waiter to the bar.
      * @param waiter : new instance
-     * @throws Exceptions.MaxCapacityReachedException
+     * @throws exceptions.MaxCapacityReachedException
      */
     public void addWaiter(Waiter waiter) throws MaxCapacityReachedException {
         if (employees.size() == EMPLOYEE_LIMIT) {
@@ -136,7 +136,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Add a new barman to the bar.
      * @param barman 
-     * @throws Exceptions.MaxCapacityReachedException 
+     * @throws exceptions.MaxCapacityReachedException 
      */
     public void addBarman(Barman barman) throws MaxCapacityReachedException {
         if (employees.size() == EMPLOYEE_LIMIT) {
@@ -150,7 +150,7 @@ public class Bar implements InformationDisplayer {
      * Remove a barman from the employees list.
      * @param employee
      * @return true if the barman is successfully removed
-     * @throws Exceptions.MinCapacityReachedException 
+     * @throws exceptions.MinCapacityReachedException 
      */
     public Boolean removeBarman(Employee employee) throws MinCapacityReachedException {
         if (getBarmans().size() == 1) {
@@ -164,7 +164,7 @@ public class Bar implements InformationDisplayer {
      * Remove a waiter from the employees list.
      * @param employee
      * @return true if a waiter is successfully removed
-     * @throws Exceptions.MinCapacityReachedException 
+     * @throws exceptions.MinCapacityReachedException 
      */
     public Boolean removeWaiter(Employee employee) throws MinCapacityReachedException {
         if (getWaiters().size() == 1) {
@@ -189,7 +189,7 @@ public class Bar implements InformationDisplayer {
     /**
      * Add a new client to the bar.
      * @param client 
-     * @throws Exceptions.MaxCapacityReachedException 
+     * @throws exceptions.MaxCapacityReachedException 
      */
     public void addClient(Client client) throws MaxCapacityReachedException {
         if (clients.size() == TABLES_LIMIT*4) {
@@ -203,7 +203,7 @@ public class Bar implements InformationDisplayer {
      * Remove a client from the clients list.
      * @param client
      * @return true if the client is successufully removed
-     * @throws Exceptions.MinCapacityReachedException 
+     * @throws exceptions.MinCapacityReachedException 
      */
     public Boolean removeClient(Client client) throws MinCapacityReachedException {
         if (clients.size() == 1) {
@@ -227,7 +227,7 @@ public class Bar implements InformationDisplayer {
     
     /**
      * Add new tables to the pub.
-     * @throws Exceptions.MaxCapacityReachedException
+     * @throws exceptions.MaxCapacityReachedException
      */
     public void addTable() throws MaxCapacityReachedException {
         if (tables.size() == TABLES_LIMIT) {

@@ -6,7 +6,7 @@
 
 package pubmanagement;
 
-import Exceptions.DoesNotExistException;
+import exceptions.DoesNotExistException;
 import java.util.ArrayList;
 //import java.time.LocalTime;
 
@@ -108,7 +108,6 @@ abstract public class Waiter extends Human implements Employee, Gender {
         Boolean res = barman.takeFromStock(drink);
         if (res) {
             barman.speak("the " + drink.getName(), this);
-            barman.aksToPay(drink.getSellingPrice(), to);
               // serve the drink
             speak("Here is your order !", null);
             to.speak("Thanks", null);

@@ -5,11 +5,14 @@
  */
 package pubmanagement;
 
-import Belote.*;
+import belote.Tournament;
+import belote.Team;
+import belote.Player;
+import belote.Belote;
 
-import Exceptions.MaxCapacityReachedException;
-import Exceptions.MinCapacityReachedException;
-import Exceptions.UnsupportedInputException;
+import exceptions.MaxCapacityReachedException;
+import exceptions.MinCapacityReachedException;
+import exceptions.UnsupportedInputException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +55,7 @@ public abstract class Management {
                          + "the dialogs (N) or display the menu. This menu\n"
                          + "[M] will allow to access other functionalities of\n"
                          + "this program.\nYou may quit anytime with [Q].");
-        System.out.println("\nWhat is your pub called ?");
+        System.out.println("\nHow is your pub called ?");
         Scanner in = new Scanner(System.in);
         System.out.print(">>> ");
         String input = in.nextLine();
@@ -868,14 +871,14 @@ public abstract class Management {
     public static void belote(Bar bar) {
         System.out.println("--------------------------------------------------");
         System.out.println(" -> Menu -> Belote            [R] Return [Q] Quit ");
-        if (getOrdered(bar).size() > 3*2) System.out.println(" [G] Single Game    [T] Tournament ");
+        if (getOrdered(bar).size() > Tournament.NB_TEAMS*2) System.out.println(" [G] Single Game    [T] Tournament ");
         else System.out.println(" [G] Single Game ");
-        if (bar.getTournamentCount() != 0) System.out.println(" [H] See tournaments history");
+        // if (bar.getTournamentCount() != 0) System.out.println(" [H] See tournaments history");
         System.out.println("--------------------------------------------------");
         String input = null;
         try { 
-            if (getOrdered(bar).size() > 3*2) input = scanInput(CMD_B_MENU); 
-            else if (bar.getTournamentCount() != 0) input = scanInput("Q,G,T,H,R");
+            if (getOrdered(bar).size() > Tournament.NB_TEAMS*2) input = scanInput(CMD_B_MENU); 
+            else if (bar.getTournamentCount() != 0) input = scanInput("Q,G,T,R"); // with history : "Q,G,T,H,R"
             else input = scanInput("Q,G,R");
         }
         catch (UnsupportedInputException e) {
@@ -898,19 +901,16 @@ public abstract class Management {
                 belote(bar);
             }
             case "R" -> menu(bar);
-            case "H" -> {
-                // display the history
-                belote(bar);
-            }
         }
     }
     
     public static void singleGame(Bar bar) {
         ArrayList<Player> players = singleGameRegister(bar);
+        Belote beloteGame = new Belote();
+        beloteGame.players = players;
         // game initiation and run
-        // getWinners
-        // winnerAction(false)
-        // loserAction(false, winners)
+        System.out.println("Running single game");
+        beloteGame.entireGame(bar);
     }
     
     /**
@@ -920,7 +920,7 @@ public abstract class Management {
      */
     public static ArrayList<Player> singleGameRegister(Bar bar) {
         ArrayList<Player> players = new ArrayList<>();
-        ArrayList<Human> all = getOrdered(bar);
+        ArrayList<Client> all = bar.getClients();
         
         System.out.println("Are you playing ? (O/X)");
         String input = null;
@@ -938,7 +938,9 @@ public abstract class Management {
             }
             case "R" -> belote(bar);
             case "O" -> {
-                Player user = new Player(null, false);
+                Client tmp = bar.getClients().get(0);
+                tmp.setUser();
+                Player user = new Player(tmp, false);
                 players.add(user);
                 
             }
@@ -968,18 +970,18 @@ public abstract class Management {
                     all.remove(aiPlayer.getHuman());
                     players.add(aiPlayer);
                     System.out.println(aiPlayer.getHuman().getName()+ " "
-                            + aiPlayer.getHuman().getSurname() +"is registered for the game");
+                            + aiPlayer.getHuman().getSurname() +" is registered for the game");
                 }
             }
             case "A" -> {
                 Player aiPlayer = null;
-                while (players.size() < 4) {
+                while (players.size() < Belote.NB_PLAYER) {
                     aiPlayer = automaticRegister(bar, all);
                     // prevent registering multiple times the same human
                     all.remove(aiPlayer.getHuman());
                     players.add(aiPlayer);
                     System.out.println(aiPlayer.getHuman().getName()+ " "
-                            + aiPlayer.getHuman().getSurname() +"is registered for the game");
+                            + aiPlayer.getHuman().getSurname() +" is registered for the game");
                 }
             }
         }
@@ -989,10 +991,14 @@ public abstract class Management {
     public static void tournament(Bar bar) {
         Tournament tournament = new Tournament(bar);
         ArrayList<Team> teams = tournamentRegister(bar, tournament);
+        tournament.teams = teams;
         // game initiation and run
+        System.out.println("Running tournament");
+        tournament.run();
         // getWinners
-        // winnerAction(false)
-        // loserAction(false, winners)
+        Team winners = tournament.getWinner();
+        Team losers = tournament.getLoser();
+        tournament.endAction();
     }
     
     /**
@@ -1004,7 +1010,7 @@ public abstract class Management {
     public static ArrayList<Team> tournamentRegister(Bar bar, Tournament tournament) {
         Scanner in = new Scanner(System.in);
         ArrayList<Team> teams = new ArrayList<>();
-        ArrayList<Human> all = getOrdered(bar);
+        ArrayList<Client> all = bar.getClients();
         
         System.out.println("Are you playing ? (O/X)");
         String input = null;
@@ -1025,11 +1031,13 @@ public abstract class Management {
             case "O" -> {
                 // create user's team
                 Player[] userTeam = new Player[2];
-                Player user = new Player(null, false);
+                Client tmp = bar.getClients().get(0);
+                tmp.setUser();
+                Player user = new Player(tmp, false);
                 userTeam[0] = user;
                 System.out.println("Choose your team member :");
                 userTeam[1] = manualRegister(bar, all);
-                all.remove(userTeam[1].getHuman());
+                all.remove((Client) userTeam[1].getHuman());
                 System.out.println("What is your team name ?");
                 input = in.nextLine();
                 teams.add(new Team(userTeam, input));
@@ -1056,7 +1064,7 @@ public abstract class Management {
             }
             case "R" -> belote(bar);
             case "M" -> {
-                while (teams.size() < 3) {
+                while (teams.size() < Tournament.NB_TEAMS) {
                     aiPlayers[0] = manualRegister(bar, all);
                     all.remove(aiPlayers[0].getHuman()); // prevent registering multiple times the same human
                     aiPlayers[1] = manualRegister(bar, all);
@@ -1067,13 +1075,13 @@ public abstract class Management {
                         aiPlayer.getHuman().setWalletBalance(aiPlayer.getHuman().getWalletBalance() - Tournament.REGISTER_PRICE);
                         tournament.setRegisterPoll(tournament.getRegisterPoll() + Tournament.REGISTER_PRICE);
                         System.out.println(aiPlayer.getHuman().getName()+ " "
-                                + aiPlayer.getHuman().getSurname() +"is registered for the tournament");
+                                + aiPlayer.getHuman().getSurname() +" is registered for the tournament");
                     }
                     teams.add(new Team(aiPlayers, Team.NAMES.get((int) (Math.random()*Team.NAMES.size()))));
                 }
             }
             case "A" -> {
-                while (teams.size() < 3) {
+                while (teams.size() < Tournament.NB_TEAMS) {
                     aiPlayers[0] = automaticRegister(bar, all);
                     all.remove(aiPlayers[0].getHuman()); // prevent registering multiple times the same human
                     aiPlayers[1] = automaticRegister(bar, all);
@@ -1084,7 +1092,7 @@ public abstract class Management {
                         aiPlayer.getHuman().setWalletBalance(aiPlayer.getHuman().getWalletBalance() - Tournament.REGISTER_PRICE);
                         tournament.setRegisterPoll(tournament.getRegisterPoll() + Tournament.REGISTER_PRICE);
                         System.out.println(aiPlayer.getHuman().getName()+ " "
-                                + aiPlayer.getHuman().getSurname() +"is registered for the tournament");
+                                + aiPlayer.getHuman().getSurname() +" is registered for the tournament");
                     }
                     teams.add(new Team(aiPlayers, Team.NAMES.get((int) (Math.random()*Team.NAMES.size()))));
                 }
@@ -1100,7 +1108,7 @@ public abstract class Management {
      * @param all human ArrayList to choose from
      * @return the player chosen
      */
-    public static Player manualRegister(Bar bar, ArrayList<Human> all) {
+    public static Player manualRegister(Bar bar, ArrayList<Client> all) {
         System.out.println("Choose the human you want to register :");
         String registerCmd = "Q,R,";
         for (int i = 0; i<all.size(); i++) {
@@ -1133,7 +1141,7 @@ public abstract class Management {
      * @param all human ArrayList to choose from
      * @return the player chosen
      */
-    public static Player automaticRegister(Bar bar, ArrayList<Human> all) {
+    public static Player automaticRegister(Bar bar, ArrayList<Client> all) {
         return new Player(all.get((int)(Math.random()*all.size())), true);
     }
     
